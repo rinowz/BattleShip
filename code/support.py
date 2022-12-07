@@ -17,3 +17,16 @@ def get_loc_value(key):
     return value
 
 
+def sign(x):
+    """
+    Возвращает знак числа x: 1 для положительных чисел, -1 для отрицательных, 0 для 0
+    :param x: число
+    :return: 1, -1, или 0
+    """
+
+    if x > 0:
+        return 1
+    if x < 0:
+        return -1
+    return 0
+
