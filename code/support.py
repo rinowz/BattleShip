@@ -1,3 +1,4 @@
+""" Дополнительные функции, которые упрощают работу"""
 import json
 from settings import *
 
@@ -17,16 +18,77 @@ def get_loc_value(key):
     return value
 
 
-def sign(x):
+def sign(array):
     """
-    Возвращает знак числа x: 1 для положительных чисел, -1 для отрицательных, 0 для 0
-    :param x: число
-    :return: 1, -1, или 0
+    Для каждого элемента итерируемого возвращает знак числа: 1 для положительных чисел, -1 для отрицательных, 0 для 0
+    :param array: массив
+    :return: список из 1, -1, и 0
     """
 
-    if x > 0:
-        return 1
-    if x < 0:
-        return -1
-    return 0
+    sign_array = []
 
+    for item in array:
+        item_sign = 0
+        if item > 0:
+            item_sign = 1
+        elif item < 0:
+            item_sign = -1
+
+        sign_array.append(item_sign)
+
+    return sign_array
+
+
+def round_list(input_values):
+    """
+    Округляет поэлементно элементы массива.
+    :param input_values: список или что-то итерируемое с элементами, на которые действует round()
+    :return: список из округленных элементов входных данных
+    """
+    rounded_values = []
+
+    for item in input_values:
+        rounded_values.append(round(item))
+
+    return rounded_values
+
+
+def add_lists(array1, array2):
+    """
+    Поэлементно применяет сложение к элементам двух итерируемых с одинаковыми индексами
+    :param array1: первый массив
+    :param array2: второй массив
+    :return: список являющийся суммой двух массивов
+    """
+    n = min(len(array1), len(array2))
+
+    sum_array = []
+
+    for i in range(n):
+        sum_array.append(array1[i] + array2[i])
+
+    return sum_array
+
+
+def multiply_list(input_array, number):
+    """
+    Умножает каждый элемент итерируемого на число.
+    :param input_array: массив
+    :param number: число
+    :return: список из элементов массива умноженных на число
+    """
+    multiplied_array = []
+
+    for item in input_array:
+        multiplied_array.append(item * number)
+
+    return multiplied_array
+
+
+def minus(input_array):
+    """
+    Умножает на -1
+    :param input_array: итерируемый, который нужно умножить
+    :return: смотрите двумя строками ниже
+    """
+    return multiply_list(input_array, -1)

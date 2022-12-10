@@ -1,9 +1,10 @@
+""" Настройки игры"""
 import pygame
 
 DEFAULT_STATE = "play"
 WIDTH = 1280
 HEIGHT = 750
-FPS = 60
+FPS = 600
 
 # Задаем цвета
 WHITE = (255, 255, 255)
@@ -21,4 +22,8 @@ CONTROLS = {
     "right": pygame.K_d
 }
 
-PLAYER_POSITION = pygame.math.Vector2(WIDTH//2, HEIGHT//2)
+PLAYER_POSITION = [WIDTH//2, HEIGHT//2]
+BACKGROUND_POSITION = [0, 0]
+
+# граница, за которую не должны заходить спрайты ((x_min, x_max), (y_min, y_max))
+BORDERS = ((-1000, 1000), (-1000, 1000))
