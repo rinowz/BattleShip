@@ -24,7 +24,9 @@ class Rock(ExplodingObject):
         super().__init__(pos, groups, collision_group, image, vel)
 
     def update(self, dt):
-        """ Камень движется с постоянной скоростью"""
+        """ Камень движется с постоянной скоростью
+        :param dt: время между кадрами,
+        которое используется, чтобы установить с какой скоростью должны двигаться спрайты."""
         self.add_vel(dt)
 
         super(Rock, self).update()
