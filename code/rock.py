@@ -23,7 +23,9 @@ class Rock(Object):
         super(Rock, self).__init__(pos, groups, image, vel)
 
     def update(self, dt):
-        """ Камень движется с постоянной скоростью"""
+        """ Камень движется с постоянной скоростью
+        :param dt: время между кадрами,
+        которое используется, чтобы установить с какой скоростью должны двигаться спрайты."""
         self.add_vel(dt)
 
         if not ((BORDERS[0][0] < self.rect.centerx < BORDERS[0][1]) and

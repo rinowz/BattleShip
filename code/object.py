@@ -39,5 +39,7 @@ class Object(pygame.sprite.Sprite):
         self.set_pos(add_lists(self.pos, increment))
 
     def add_vel(self, dt):
-        """ Добавляет скорость к позиции"""
+        """ Добавляет скорость к позиции
+        :param dt: время между кадрами,
+        которое используется, чтобы установить с какой скоростью должны двигаться спрайты."""
         self.add_to_pos(multiply_list(self.velocity, dt))
