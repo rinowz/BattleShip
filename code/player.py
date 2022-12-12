@@ -1,27 +1,34 @@
 """ Класс PLayer"""
 import math
 import pygame.math
-from ship import Ship
+from ship_like import ShipLike
 from settings import *
 from support import *
 
 
-class Player(Ship):
+class Player(ShipLike):
     """ Корабль, которым управляет игрок"""
 
-    def __init__(self, pos, groups, collidable_sprites):
+    def __init__(self, collidable_sprites, player_info, projectile_info):
         """
-        :param pos: Позиция объекта - итерируемый со значениями для x и y
-        :param groups: группы, в которые нужно включить спрайт
         :param collidable_sprites: группа содержащая спрайты,
         с которыми игрок будет "сталкиваться" - не проходить насквозь
+        :param player_info: начальная информация об игроке
+        :param projectile_info: информация о выпускаемых при выстреле снарядах
         """
+        super(Player, self).__init__(player_info, projectile_info)
 
-        # загружается изображение игрока и поворачивается в желаемое начальное положение
-        loaded_image = pygame.image.load("../graphics/ship2.0.png").convert_alpha()
-        self.initial_image = pygame.transform.rotate(loaded_image, -90)
+        # изначальное изображение положением вправо
+        self.angle = -math.pi
+        self.initial_image = self.image.copy()
+
         self.collidable_sprites = collidable_sprites
-        super().__init__(pos, groups, self.initial_image)
+
+        self.shoot_time = pygame.time.get_ticks()
+        self.can_attack = True
+        self.attack_cooldown = PLAYER_COOLDOWN
+        self.max_speed = PLAYER_MAX_SPEED
+        self.acceleration = PLAYER_ACCELERATION
 
     def update(self, dt):
         """
@@ -30,11 +37,20 @@ class Player(Ship):
         # Определяет и устанавливает скорость игрока
         self.set_velocity(dt)
 
+        keys = pygame.key.get_pressed()
+        if keys[CONTROLS['shoot']] and self.can_attack:
+            vel = BULLET_SPEED * pygame.math.Vector2(math.cos(self.angle), -math.sin(self.angle))
+            self.shoot(self.pos, vel)
+            self.shoot_time = pygame.time.get_ticks()
+            self.can_attack = False
+
         # Изменение координат игрока
         self.add_vel(dt)
 
         # Поворот изображения игрока в направлении движения
         self.rotate_image()
+
+        self.cooldown()
 
     def set_velocity(self, dt):
         """ Определяет какая скорость должна быть у игрока в данный момент
@@ -82,7 +98,12 @@ class Player(Ship):
         """ Поворачивает начальное изображение на угол отклонения скорости от вертикального направления вверх"""
         if self.velocity.magnitude() != 0:
             old_center = self.rect.center
-            angle = -180 * math.atan2(self.velocity.y, self.velocity.x) / math.pi
+            self.angle = -math.atan2(self.velocity.y, self.velocity.x)
 
-            self.image = pygame.transform.rotate(self.initial_image, angle)
+            self.image = pygame.transform.rotate(self.initial_image, math.degrees(self.angle))
             self.rect = self.image.get_rect(center=old_center)
+
+    def cooldown(self):
+        if not self.can_attack:
+            if pygame.time.get_ticks() - self.shoot_time > self.attack_cooldown:
+                self.can_attack = True

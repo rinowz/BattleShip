@@ -7,38 +7,51 @@ from support import *
 class ExplodingObject(Object):
     """ Объект, который уничтожается при столкновении с другим объектом"""
 
-    def __init__(self, pos, groups, collision_group, image=pygame.Surface((50, 50)), vel=(0, 0)):
+    def __init__(self, object_info, collision_group):
         """
-        :param pos: Позиция объекта - итерируемый со значениями для x и y
-        :param groups: группы, в которые нужно включить спрайт
+        :param object_info: информация о создаваемом объекте
         :param collision_group: группа, при столкновении с элементами которой нужно взрываться
-        :param image: surface изображения объекта
-        :param vel: начальная скорость - итерируемый из 2 элементов, который превращается в Vector2
         """
-
-        super().__init__(pos, groups, image, vel)
+        super().__init__(object_info)
 
         self.collision_group = collision_group
         self.colliding_objects = []
-        self.damage = 1
+        self.ignored_objects = {self}
 
-    def update(self):
+        self.change_layer(-1)
+
+    def update(self, dt):
+
+        # Обновляем позицию объекта
+        self.update_position(dt)
+
+        # Находим столкновения
+        self.find_collision()
+
+        # если есть столкновение, взрываем себя
+        if len(self.colliding_objects) > 0:
+            self.explosion()
+
+        # уничтожается при выходе за рамки игры
+        if not ((BORDERS[0][0] < self.rect.centerx < BORDERS[0][1]) and
+                (BORDERS[1][0] < self.rect.centery < BORDERS[1][1])):
+            self.explosion()
+
+    def find_collision(self):
+        """ Меняет self.colliding_objects на объекты, с которыми есть столкновение"""
 
         # проверяем с чем может сталкиваться объект
         self.colliding_objects = pygame.sprite.spritecollide(self, self.collision_group, False)
 
-        # убираем столкновение с собой
-        if self in self.colliding_objects:
-            self.colliding_objects.remove(self)
+        # убираем столкновение с игнорируемыми объектами
+        for object in self.ignored_objects:
+            if object in self.colliding_objects:
+                self.colliding_objects.remove(object)
 
         # более точно проверяем масками
         for object in self.colliding_objects:
             if self.mask.overlap(object.mask, get_mask_offset(self, object)) is None:
                 self.colliding_objects.remove(object)
-
-        # если есть столкновение, взрываем себя
-        if len(self.colliding_objects) > 0:
-            self.explosion()
 
     def explosion(self):
         """
@@ -47,9 +60,23 @@ class ExplodingObject(Object):
         """
         for object in self.colliding_objects:
             if self.mask.overlap(object.mask, get_mask_offset(self, object)):
-                object.hit(self.damage)
+                object.hit(self)
 
         self.kill()
 
+    def exclude_collision(self, object):
+        """ Не проверяет столкновение с данным объектом"""
+        self.ignored_objects.add(object)
 
+    def update_position(self, dt):
+        """ Логика обновления координат. По умолчанию - прибавление скорости"""
+        self.add_vel(dt)
 
+    def hit(self, hitter):
+        """
+        Вызывается когда что-то сталкивается с объектом
+        :param hitter: Объект, который вызывает столкновение
+        """
+        self.exclude_collision(hitter)
+        self.find_collision()
+        self.explosion()

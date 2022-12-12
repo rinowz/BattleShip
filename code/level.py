@@ -3,7 +3,9 @@ import pygame
 from player import Player
 from settings import *
 from support import *
-from rock import Rock
+from object_info import ObjectInfo, PlayerInfo
+from projectile_info import ProjectileInfo
+from exploding_object import ExplodingObject
 
 
 class Level:
@@ -14,22 +16,35 @@ class Level:
         self.background_surf = pygame.image.load("../graphics/background.jpg")
         self.background_rect = self.background_surf.get_rect(center=BACKGROUND_POSITION)
 
+        # группы
+        self.visible_sprites = self.CameraGroup()
         self.collidable_sprites = pygame.sprite.Group()
 
-        # создание игрока
-        self.player = Player(
-            PLAYER_POSITION, [], self.collidable_sprites)
+        # функция изменения слоя
+        self.layer_change = build_layer_change_function(self.visible_sprites)
 
-        self.visible_sprites = self.CameraGroup(self)
-        self.visible_sprites.add(self.player)
+        # Информация об игроке
+        player_info = PlayerInfo(PLAYER_POSITION, [self.visible_sprites], layer_change=self.layer_change)
+        projectile_radius = 10
+        projectile_sprite = pygame.Surface((2*projectile_radius, 2*projectile_radius))
+        projectile_sprite.set_colorkey(BLACK)
+        pygame.draw.circle(projectile_sprite, WHITE, (projectile_radius, projectile_radius), projectile_radius)
+        projectile_info = ProjectileInfo([self.visible_sprites], self.visible_sprites, projectile_sprite,
+                                         layer_change=self.layer_change)
+
+        # создание игрока
+        self.player = Player(self.collidable_sprites, player_info, projectile_info)
+        self.visible_sprites.player = self.player
 
         self.rocks = []
         # создаем камень
-        self.rocks.append(Rock([0, 0], [self.visible_sprites],
-                               self.visible_sprites, (30, 30)))
+        rock_radius = 50
+        rock_image = pygame.Surface((2*rock_radius, 2*rock_radius))
+        rock_image.set_colorkey(BLACK)
+        pygame.draw.circle(rock_image, GREEN, (rock_radius, rock_radius), rock_radius)
 
-        for rock in self.rocks:
-            self.visible_sprites.change_layer(rock, -1)
+        rock_info = ObjectInfo([0, 0], [self.visible_sprites], rock_image, (30, 30))
+        self.rocks.append(ExplodingObject(rock_info, self.visible_sprites))
 
     def run(self, dt):
         """ Обновляет и рисует игру"""
@@ -49,16 +64,12 @@ class Level:
         """ Отражает существование камеры. Такая же фигня, как и pygame.sprite.LayeredUpdates,
         только имеет отклонение от положения камеры."""
 
-        def __init__(self, outer):
-            """
-            :param outer: Объект класса Level, внутри которого создается данный объект
-            """
+        def __init__(self):
+            """ !установить self.player до того как рисовать"""
+            self.player = None
+
             super().__init__(default_layer=0)
             self.display_surface = pygame.display.get_surface()
-
-            # игрок забирается из вызывающего объекта
-            self.outer = outer
-            self.player = self.outer.player
 
             # камере задается положение
             self.camera_position = [0, 0]

@@ -5,22 +5,24 @@ from support import *
 
 class Object(pygame.sprite.Sprite):
     """ Объект, который движется"""
-    def __init__(self, pos, groups, image=pygame.Surface((50, 50)), vel=(0, 0)):
+    def __init__(self, object_info):
         """
-        :param pos: Позиция объекта - итерируемый со значениями для x и y
-        :param groups: группы, в которые нужно включить спрайт
-        :param image: surface изображения объекта
-        :param vel: начальная скорость - итерируемый из 2 элементов, который превращается в Vector2
+        :param object_info: информация о создаваемом объекте
         """
-        super().__init__(groups)
-        self.image = image
+        super().__init__(object_info.groups)
+        self.image = object_info.image
         self.rect = self.image.get_rect()
         self.pos = [0, 0]
-        self.set_pos(pos)
+        self.set_pos(object_info.pos)
         self.mask = pygame.mask.from_surface(self.image)
 
+        self.layer_change = object_info.layer_change
+
+        # Урон наносимый при атаке других объектов. Не совсем логичное место объявлять, но пусть будет на всякий случай
+        self.damage = 1
+
         # вектор скорости объекта
-        self.velocity = pygame.Vector2(vel)
+        self.velocity = pygame.Vector2(object_info.vel)
 
     def set_pos(self, pos):
         """
@@ -48,3 +50,10 @@ class Object(pygame.sprite.Sprite):
     def hit(self, damage):
         """ Что происходит, когда объекту наносится урон"""
         pass
+
+    def change_layer(self, layer):
+        """
+        Меняет слой, на котором рисуется объект
+        :param layer: номер слоя
+        """
+        self.layer_change(self, layer)

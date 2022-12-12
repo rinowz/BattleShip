@@ -95,3 +95,28 @@ def get_mask_offset(obj1, obj2):
     """
 
     return add_lists(obj2.rect.topleft, minus(obj1.rect.topleft))
+
+
+def build_layer_change_function(layer_group):
+    """
+    Создает функцию, которая меняет слой в группе
+    :param layer_group: группа LayeredUpdates в которой нужно изменить слой
+    :return: Функция, которая принимает объект и номер слой и меняет слой объекта в layer_group
+    """
+
+    def change_layer(sprite, layer):
+        """
+        Меняет слой объекта
+        :param sprite: объект, слой которого нужно изменить
+        :param layer: номер слоя
+        :return: None
+        """
+        if sprite in layer_group:
+            layer_group.change_layer(sprite, layer)
+
+    return change_layer
+
+
+def useless(_, __):
+    """ Функция, которая принимает два аргумента и ничего не делает. Используется при отсутствии функции layer_change"""
+    pass
