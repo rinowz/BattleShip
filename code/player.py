@@ -18,7 +18,7 @@ class Player(Ship):
         """
 
         # загружается изображение игрока и поворачивается в желаемое начальное положение
-        loaded_image = pygame.image.load("../graphics/playerShip1_orange.png").convert_alpha()
+        loaded_image = pygame.image.load("../graphics/ship2.0.png").convert_alpha()
         self.initial_image = pygame.transform.rotate(loaded_image, -90)
         self.collidable_sprites = collidable_sprites
         super().__init__(pos, groups, self.initial_image)
