@@ -23,9 +23,13 @@ class Level:
         self.visible_sprites = self.CameraGroup(self)
         self.visible_sprites.add(self.player)
 
+        self.rocks = []
         # создаем камень
-        rock = Rock([0, 0], [self.visible_sprites, self.collidable_sprites], (30, 30))
-        self.visible_sprites.change_layer(rock, -1)
+        self.rocks.append(Rock([0, 0], [self.visible_sprites],
+                               self.visible_sprites, (30, 30)))
+
+        for rock in self.rocks:
+            self.visible_sprites.change_layer(rock, -1)
 
     def run(self, dt):
         """ Обновляет и рисует игру"""
@@ -38,6 +42,7 @@ class Level:
 
         # видимые объекты группы CameraGroup
         self.visible_sprites.update(dt)
+
         self.visible_sprites.offset_draw(dt)
 
     class CameraGroup(pygame.sprite.LayeredUpdates):

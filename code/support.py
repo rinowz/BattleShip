@@ -84,3 +84,14 @@ def minus(input_array):
     :return: смотрите двумя строками ниже
     """
     return multiply_list(input_array, -1)
+
+
+def get_mask_offset(obj1, obj2):
+    """
+    Возвращает расстояние между левыми верхними углами масок(на самом деле rect).
+    :param mask1: объект, из которого выходит расстояние
+    :param mask2: объект, в который входит расстояние
+    :return: список из координат x и y
+    """
+
+    return add_lists(obj2.rect.topleft, minus(obj1.rect.topleft))

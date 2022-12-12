@@ -17,6 +17,7 @@ class Object(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.pos = [0, 0]
         self.set_pos(pos)
+        self.mask = pygame.mask.from_surface(self.image)
 
         # вектор скорости объекта
         self.velocity = pygame.Vector2(vel)
@@ -41,3 +42,7 @@ class Object(pygame.sprite.Sprite):
     def add_vel(self, dt):
         """ Добавляет скорость к позиции"""
         self.add_to_pos(multiply_list(self.velocity, dt))
+
+    def hit(self, damage):
+        """ Что происходит, когда объекту наносится урон"""
+        pass
