@@ -23,7 +23,9 @@ class Level:
         self.visible_sprites = self.CameraGroup(self)
         self.visible_sprites.add(self.player)
 
-        Rock([0, 0], [self.visible_sprites, self.collidable_sprites], (30, 30))
+        # создаем камень
+        rock = Rock([0, 0], [self.visible_sprites, self.collidable_sprites], (30, 30))
+        self.visible_sprites.change_layer(rock, -1)
 
     def run(self, dt):
         """ Обновляет и рисует игру"""
@@ -38,15 +40,15 @@ class Level:
         self.visible_sprites.update(dt)
         self.visible_sprites.offset_draw(dt)
 
-    class CameraGroup(pygame.sprite.Group):
-        """ Отражает существование камеры. Такая же фигня, как и pygame.sprite.Group,
+    class CameraGroup(pygame.sprite.LayeredUpdates):
+        """ Отражает существование камеры. Такая же фигня, как и pygame.sprite.LayeredUpdates,
         только имеет отклонение от положения камеры."""
 
         def __init__(self, outer):
             """
             :param outer: Объект класса Level, внутри которого создается данный объект
             """
-            super().__init__()
+            super().__init__(default_layer=0)
             self.display_surface = pygame.display.get_surface()
 
             # игрок забирается из вызывающего объекта
@@ -83,7 +85,6 @@ class Level:
             for sprite in sprites:
                 pos = round_list(add_lists(sprite.rect.center, offset))
 
-
                 rect = sprite.image.get_rect(center=pos)
                 self.display_surface.blit(sprite.image, rect)
 
@@ -98,17 +99,25 @@ class Level:
             # Скорость антикамеры определяется вдоль вектора расстояния, пропорционально максимальной скорости игрока.
             # Таким образом, при достижении некоторой точки, антикамера движется с такой же скоростью, как и игрок.
             camera_velocity = pygame.math.Vector2()
-            if distance.magnitude() != 0:
-                camera_velocity.x = distance.x * self.player.max_speed / ((WIDTH // 2) - 50)
-                camera_velocity.y = distance.y * self.player.max_speed / ((HEIGHT // 2) - 50)
 
-            # Добавляем постоянную компоненту к скорости камеры
-            camera_velocity = pygame.math.Vector2(add_lists(camera_velocity, multiply_list(sign(camera_velocity), 100)))
+            # Минимальная скорость камеры
+            camera_min_speed = self.player.max_speed * 0.1
+
+            # Добавляем минимальную скорость к камере
+            if distance.magnitude() != 0:
+                camera_velocity.x = sign(distance.x) * \
+                                    (abs(distance.x * self.player.max_speed / ((WIDTH // 2) - 50)) + camera_min_speed)
+                camera_velocity.y = sign(distance.y) * \
+                                    (abs(distance.y * self.player.max_speed / ((HEIGHT // 2) - 50)) + camera_min_speed)
+
+            # Устанавливаем позицию антикамеры
+            self.camera_antiposition = add_lists(self.camera_antiposition, camera_velocity * dt)
+
+            # Позиция антикамеры, при которой игрок находится в центре
+            center_pos = add_lists(self.player.pos, minus((PLAYER_POSITION)))
 
             # Антикамера(центр экрана) должна всегда следовать за игроком. Если она обгоняет игрока, останавливаем ее
-            if (camera_velocity.magnitude() * dt > distance.magnitude()) and \
-                    (camera_velocity.magnitude() > self.player.velocity.magnitude()):
-                self.camera_antiposition = add_lists(self.player.pos, minus((PLAYER_POSITION)))
-            else:
-                self.camera_antiposition = add_lists(self.camera_antiposition, camera_velocity * dt)
-
+            if abs(camera_velocity.x * dt) > abs(distance.x) and abs(camera_velocity.x) > abs(self.player.velocity.x):
+                self.camera_antiposition[0] = center_pos[0]
+            if abs(camera_velocity.y * dt) > abs(distance.y) and abs(camera_velocity.y) > abs(self.player.velocity.y):
+                self.camera_antiposition[1] = center_pos[1]
