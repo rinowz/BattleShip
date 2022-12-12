@@ -18,25 +18,17 @@ def get_loc_value(key):
     return value
 
 
-def sign(array):
+def sign(x):
     """
-    Для каждого элемента итерируемого возвращает знак числа: 1 для положительных чисел, -1 для отрицательных, 0 для 0
-    :param array: массив
-    :return: список из 1, -1, и 0
+    Возвращает знак числа: 1 для положительных чисел, -1 для отрицательных, 0 для 0
+    :param x: число
+    :return: 1, -1, или 0
     """
-
-    sign_array = []
-
-    for item in array:
-        item_sign = 0
-        if item > 0:
-            item_sign = 1
-        elif item < 0:
-            item_sign = -1
-
-        sign_array.append(item_sign)
-
-    return sign_array
+    if x > 0:
+        return 1
+    if x < 0:
+        return -1
+    return 0
 
 
 def round_list(input_values):
