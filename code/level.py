@@ -3,9 +3,10 @@ import pygame
 from player import Player
 from settings import *
 from support import *
-from object_info import ObjectInfo, PlayerInfo
+from object_info import ObjectInfo, ShipInfo, PlayerInfo
 from projectile_info import ProjectileInfo
 from exploding_object import ExplodingObject
+from enemy_ship import EnemyShip
 
 
 class Level:
@@ -30,7 +31,7 @@ class Level:
         projectile_sprite.set_colorkey(BLACK)
         pygame.draw.circle(projectile_sprite, WHITE, (projectile_radius, projectile_radius), projectile_radius)
         projectile_info = ProjectileInfo([self.visible_sprites], self.visible_sprites, projectile_sprite,
-                                         layer_change=self.layer_change)
+                                         layer_change=self.layer_change, damage=10)
 
         # создание игрока
         self.player = Player(self.collidable_sprites, player_info, projectile_info)
@@ -38,13 +39,15 @@ class Level:
 
         self.rocks = []
         # создаем камень
-        rock_radius = 50
-        rock_image = pygame.Surface((2*rock_radius, 2*rock_radius))
-        rock_image.set_colorkey(BLACK)
-        pygame.draw.circle(rock_image, GREEN, (rock_radius, rock_radius), rock_radius)
+        rock_image = pygame.image.load('../graphics/Meteor1.png').convert_alpha()
 
         rock_info = ObjectInfo([0, 0], [self.visible_sprites], rock_image, (30, 30))
         self.rocks.append(ExplodingObject(rock_info, self.visible_sprites))
+
+        enemy_image = pygame.transform.rotate(pygame.image.load(PLAYER_IMAGE).convert_alpha(), -90)
+        enemy_info = ShipInfo((100, 100), [self.visible_sprites], layer_change=self.layer_change, max_speed=200,
+                              image=enemy_image, acceleration=50, attack_cooldown=2000, hp=20)
+        enemy1 = EnemyShip(enemy_info, projectile_info, self.player)
 
     def run(self, dt):
         """ Обновляет и рисует игру"""

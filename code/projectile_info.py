@@ -7,7 +7,8 @@ from support import *
 class ProjectileInfo:
     """ Информация о снаряде, выпускаемом при выстреле в ShipLike"""
 
-    def __init__(self, groups, collision_group, image=pygame.Surface((10, 10)), layer_change=useless):
+    def __init__(self, groups, collision_group, image=pygame.Surface((10, 10)), layer_change=useless,
+                 damage=PLAYER_DAMAGE):
         """
         :param groups: Группы, в которые должен входить снаряд
         :param collision_group: Группа, сталкиваясь с которой, снаряд взрывается
@@ -17,6 +18,7 @@ class ProjectileInfo:
         self.collision_group = collision_group
         self.image = image
         self.layer_change = layer_change
+        self.damage = damage
 
     def get_object_info(self, pos, vel):
         """

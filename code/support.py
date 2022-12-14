@@ -1,5 +1,6 @@
 """ Дополнительные функции, которые упрощают работу"""
 import json
+import math
 from settings import *
 
 
@@ -120,3 +121,15 @@ def build_layer_change_function(layer_group):
 def useless(_, __):
     """ Функция, которая принимает два аргумента и ничего не делает. Используется при отсутствии функции layer_change"""
     pass
+
+
+def get_angle(direction):
+    """
+    Находит угол, который направление составляет с горизонтом
+    :param direction: итерируемый из двух элементов - направление по x и y
+    :return: угол в радианах
+    """
+    if direction[0] == 0:
+        return -sign(direction[1]) * math.pi / 2
+
+    return -math.atan2(direction[1], direction[0])
