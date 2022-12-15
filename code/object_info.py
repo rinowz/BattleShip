@@ -1,6 +1,5 @@
 """
-Класс, хранящий начальные данные для объекта.
-А также для кораблей и отдельно для игрока с загрузкой изображения игрока.
+Класс, хранящий начальные данные для разных типов объектов
 """
 import pygame
 from settings import *
@@ -25,6 +24,32 @@ class ObjectInfo:
         self.layer_change = layer_change
 
 
+class ProjectileInfo:
+    """ Информация о снаряде, выпускаемом при выстреле в ShipLike"""
+
+    def __init__(self, groups, collision_group, image=pygame.Surface((10, 10)), layer_change=useless,
+                 damage=PLAYER_DAMAGE):
+        """
+        :param groups: Группы, в которые должен входить снаряд
+        :param collision_group: Группа, сталкиваясь с которой, снаряд взрывается
+        :param image: surface изображения снаряда
+        """
+        self.groups = groups
+        self.collision_group = collision_group
+        self.image = image
+        self.layer_change = layer_change
+        self.damage = damage
+
+    def get_object_info(self, pos, vel):
+        """
+        Создает экземпляр класса object_info основываясь на своих и переданных данных
+        :param pos: Позиция объекта - итерируемый со значениями для x и y
+        :param vel: начальная скорость - итерируемый из 2 элементов, который превращается в Vector2
+        """
+
+        return ObjectInfo(pos, self.groups, self.image, vel, self.layer_change)
+
+
 class ShipInfo(ObjectInfo):
     """ Информация об объекте ShipLike"""
     def __init__(self, pos, groups, image=pygame.Surface((50, 50)), vel=(0, 0), layer_change=useless,
@@ -38,6 +63,7 @@ class ShipInfo(ObjectInfo):
         :param attack_cooldown: время, которое занимает кулдаун при атаке
         :param max_speed: максимальная скорость
         :param acceleration: насколько меняется скорость, когда корабль пытается ее изменить
+        :param hp: количество здоровья
         """
         super().__init__(pos, groups, image, vel, layer_change)
 
@@ -61,3 +87,29 @@ class PlayerInfo(ShipInfo):
         image = pygame.transform.rotate(loaded_image, -90)
 
         super(PlayerInfo, self).__init__(pos, groups, image, vel, layer_change)
+
+
+class TurretInfo(ShipInfo):
+    """ Информация о создаваемой турели"""
+
+    def __init__(self, pos, groups, image=pygame.Surface((50, 50)), gun_image=pygame.Surface((30, 40)),
+                 gun_offset=(0, 0), gun_angle=0, layer_change=useless, attack_cooldown=PLAYER_COOLDOWN,
+                 acceleration=math.pi, hp=100):
+        """
+        :param pos: Позиция объекта - итерируемый со значениями для x и y
+        :param groups: группы, в которые нужно включить спрайт
+        :param image: surface изображения основания турели
+        :param gun_image: изображение вращающейся части
+        :param gun_offset: отклонение оси вращения от центра
+        :param gun_angle: начальный угол поворота
+        :param layer_change: - функция изменения слоя объекта
+        :param attack_cooldown: время, которое занимает кулдаун при атаке
+        :param acceleration: насколько меняется угол, когда турель пытается ее изменить
+        :param hp: количество здоровья
+        """
+        super().__init__(pos, groups, image, (0, 0), layer_change,
+                         attack_cooldown, 0, acceleration, hp)
+
+        self.gun_image = gun_image
+        self.gun_offset = gun_offset
+        self.gun_angle = gun_angle

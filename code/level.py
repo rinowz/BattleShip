@@ -3,10 +3,11 @@ import pygame
 from player import Player
 from settings import *
 from support import *
-from object_info import ObjectInfo, ShipInfo, PlayerInfo
-from projectile_info import ProjectileInfo
+from object_info import *
 from exploding_object import ExplodingObject
 from enemy_ship import EnemyShip
+from ui import UI
+from turret import Turret
 
 
 class Level:
@@ -49,6 +50,14 @@ class Level:
                               image=enemy_image, acceleration=50, attack_cooldown=2000, hp=20)
         enemy1 = EnemyShip(enemy_info, projectile_info, self.player)
 
+        turret_image = pygame.image.load('../graphics/turret.png')
+        turret_info = TurretInfo((200, 300), [self.visible_sprites], attack_cooldown=2000, hp=20,
+                                 gun_image=turret_image, layer_change=self.layer_change)
+        turret1 = Turret(turret_info, projectile_info, self.player)
+
+        # UI
+        self.ui = UI(self.player)
+
     def run(self, dt):
         """ Обновляет и рисует игру"""
 
@@ -60,8 +69,9 @@ class Level:
 
         # видимые объекты группы CameraGroup
         self.visible_sprites.update(dt)
-
         self.visible_sprites.offset_draw(dt)
+
+        self.ui.display()
 
     class CameraGroup(pygame.sprite.LayeredUpdates):
         """ Отражает существование камеры. Такая же фигня, как и pygame.sprite.LayeredUpdates,

@@ -1,9 +1,10 @@
 import pygame
 from ship_like import ShipLike
 from support import *
+from player_shooting import PlayerShooting
 
 
-class EnemyShip(ShipLike):
+class EnemyShip(PlayerShooting):
     """ Вражеский корабль"""
 
     def __init__(self, object_info, projectile_info, player):
@@ -13,13 +14,9 @@ class EnemyShip(ShipLike):
         :param hp: количество здоровья корабля
         """
 
-        super(EnemyShip, self).__init__(object_info, projectile_info)
+        super(EnemyShip, self).__init__(object_info, projectile_info, player)
 
-        self.player = player
-        self.shoot_tolerance = math.pi / 18
         self.detection_radius = 1000
-        self.attack_radius = 400
-        self.real_max_speed = self.max_speed
         self.stop_distance = 200
         self.projectile_speed = BULLET_SPEED/2
 
@@ -49,32 +46,8 @@ class EnemyShip(ShipLike):
         которое используется, чтобы установить с какой скоростью должны двигаться спрайты."""
         angle = self.to_player_angle()
 
-        change_direction = pygame.math.Vector2(math.cos(angle), -math.sin(angle))
+        change_direction = get_direction(angle)
         distance_factor = self.to_player_distance().magnitude() - self.stop_distance
         self.velocity_change = change_direction * distance_factor * self.acceleration
 
         super(EnemyShip, self).set_velocity(dt)
-
-    def to_shoot(self):
-        """
-        Определяет нужно ли выстрелить
-        :return: True или False
-        """
-        if self.to_player_distance().magnitude() < self.attack_radius:
-            return abs(self.to_player_angle() - self.angle) < self.shoot_tolerance
-
-        return False
-
-    def to_player_angle(self):
-        """
-        Возвращает угол расстояния до игрока
-        :return Угол в радианах
-        """
-        return get_angle(self.to_player_distance())
-
-    def to_player_distance(self):
-        """
-        Возвращает расстояние до игрока
-        :return расстояние, Vector2
-        """
-        return pygame.math.Vector2(add_lists(self.player.pos, minus(self.pos)))

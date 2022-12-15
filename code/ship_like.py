@@ -13,10 +13,11 @@ class ShipLike(Object):
         """
         :param ship_info: информация о создаваемом корабле
         :param projectile_info: информация о выпускаемых при выстреле снарядах
-        :param hp: количество здоровья объекта
         """
         super().__init__(ship_info)
-        self.angle = 0
+
+        # для поворота объекта
+        self.angle = get_angle(self.velocity)
         self.initial_image = self.image.copy()
 
         self.projectile_info = projectile_info
@@ -28,7 +29,8 @@ class ShipLike(Object):
         # Текущее значение, на которое меняется скорость
         self.velocity_change = pygame.math.Vector2()
 
-        self.hp = ship_info.hp
+        self.max_hp = ship_info.hp
+        self.hp = self.max_hp
 
         # кулдаун стрельбы
         self.shoot_time = pygame.time.get_ticks()
@@ -37,6 +39,9 @@ class ShipLike(Object):
 
         self.projectile_speed = BULLET_SPEED
         self.damage = projectile_info.damage
+
+        # Объекты, которые игнорируются выпускаемыми снарядами
+        self.no_hit_objects = [self]
 
     def update(self, dt, change_vel=True, add_vel=True, shoot_check=True, rotate=True, cooldown=True):
         """
@@ -87,7 +92,7 @@ class ShipLike(Object):
         projectile = ExplodingObject(self.projectile_info.get_object_info(self.pos, projectile_vel),
                                      self.projectile_info.collision_group)
         projectile.damage = self.damage
-        projectile.exclude_collision(self)
+        projectile.exclude_collision_list(self.no_hit_objects)
 
     def shooting(self):
         """ Вызывается для произведения выстрела"""
@@ -101,11 +106,12 @@ class ShipLike(Object):
     def rotate_image(self):
         """ Поворачивает начальное изображение на угол отклонения скорости от вертикального направления вверх"""
         if self.velocity.magnitude() != 0:
-            old_center = self.rect.center
+            old_center = self.pos
             self.angle = get_angle(self.velocity)
 
             self.image = pygame.transform.rotate(self.initial_image, math.degrees(self.angle))
-            self.rect = self.image.get_rect(center=old_center)
+            self.rect = self.image.get_rect()
+            self.set_pos(old_center)
 
     def cooldown(self):
         """ Дает возможность атаковать по прошествии кулдауна"""

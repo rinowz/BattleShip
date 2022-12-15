@@ -39,3 +39,11 @@ PLAYER_DAMAGE = 10
 
 # граница, за которую не должны заходить спрайты ((x_min, x_max), (y_min, y_max))
 BORDERS = ((-10000, 10000), (-10000, 10000))
+
+# UI
+HEALTH_BAR_POS = (30, 20)
+HEALTH_BAR_WIDTH = 250
+HEALTH_BAR_HEIGHT = 20
+HEALTH_BAR_COLOR = RED
+BORDER_WIDTH = 2
+BORDER_COLOR = (48, 50, 64)

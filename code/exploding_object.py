@@ -68,6 +68,14 @@ class ExplodingObject(Object):
         """ Не проверяет столкновение с данным объектом"""
         self.ignored_objects.add(object)
 
+    def exclude_collision_list(self, object_list):
+        """
+        Убирает столкновение с объектами из списка
+        :param object_list: список игнорируемых объектов
+        """
+        for object in object_list:
+            self.exclude_collision(object)
+
     def update_position(self, dt):
         """ Логика обновления координат. По умолчанию - прибавление скорости"""
         self.add_vel(dt)

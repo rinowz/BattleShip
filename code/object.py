@@ -47,7 +47,7 @@ class Object(pygame.sprite.Sprite):
         которое используется, чтобы установить с какой скоростью должны двигаться спрайты."""
         self.add_to_pos(multiply_list(self.velocity, dt))
 
-    def hit(self, damage):
+    def hit(self, hitter):
         """ Что происходит, когда объекту наносится урон"""
         pass
 

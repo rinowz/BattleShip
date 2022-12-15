@@ -90,8 +90,8 @@ def minus(input_array):
 def get_mask_offset(obj1, obj2):
     """
     Возвращает расстояние между левыми верхними углами масок(на самом деле rect).
-    :param mask1: объект, из которого выходит расстояние
-    :param mask2: объект, в который входит расстояние
+    :param obj1: объект, из которого выходит расстояние
+    :param obj2: объект, в который входит расстояние
     :return: список из координат x и y
     """
 
@@ -133,3 +133,12 @@ def get_angle(direction):
         return -sign(direction[1]) * math.pi / 2
 
     return -math.atan2(direction[1], direction[0])
+
+
+def get_direction(angle):
+    """
+    Находит вектор направления от угла с горизонтом
+    :param angle: угол отклонения от нуля, который справа, против часовой стрелки при выводе изображения
+    :return: единичный вектор в направлении, заданном углом
+    """
+    return pygame.math.Vector2(math.cos(angle), -math.sin(angle))
