@@ -15,7 +15,7 @@ class PlayerShooting(ShipLike):
         super(PlayerShooting, self).__init__(ship_info, projectile_info)
 
         self.player = player
-        self.attack_radius = 400
+        self.attack_radius = ship_info.attack_radius
         self.shoot_tolerance = math.pi / 18
 
     def to_shoot(self):

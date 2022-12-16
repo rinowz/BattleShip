@@ -52,17 +52,35 @@ class Turret(Object):
 
         def set_velocity(self, dt):
             """ Меняет угол на который повернута турель"""
-            angle_dif_sign = sign(self.to_player_angle() - self.angle)
+            # Нормализация угла
+            self.angle = get_angle(get_direction(self.angle))
 
-            self.angle += angle_dif_sign * self.acceleration * dt
+            rotation_sign = self.get_rotation_sign()
 
-            if sign(self.angle - self.to_player_angle()) != angle_dif_sign:
+            self.angle += rotation_sign * self.acceleration * dt
+
+            if rotation_sign != self.get_rotation_sign():
                 self.angle = self.to_player_angle()
+
+        def get_rotation_sign(self):
+            """
+            Определяет в какую сторону нужно крутиться
+            :return: Знак направления поворота
+            """
+            angle_dif = self.to_player_angle() - self.angle
+
+            angle_dif_sign = sign(angle_dif)
+
+            if abs(angle_dif) > math.pi:
+                angle_dif_sign *= -1
+
+            return angle_dif_sign
 
         def rotate_image(self):
             """ """
             self.image = pygame.transform.rotate(self.initial_image, math.degrees(self.angle))
-            self.current_pivot_vector = self.initial_pivot_vector.rotate(math.degrees(self.angle))
+            self.mask = pygame.mask.from_surface(self.image)
+            self.current_pivot_vector = self.initial_pivot_vector.rotate(-math.degrees(self.angle))
 
             self.rect = self.image.get_rect()
             self.set_pos(self.pos)

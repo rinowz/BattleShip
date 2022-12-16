@@ -44,23 +44,25 @@ class ExplodingObject(Object):
         self.colliding_objects = pygame.sprite.spritecollide(self, self.collision_group, False)
 
         # убираем столкновение с игнорируемыми объектами
-        for object in self.ignored_objects:
-            if object in self.colliding_objects:
-                self.colliding_objects.remove(object)
+        ignored_objects = self.ignored_objects.copy()
+        for ignored_object in ignored_objects:
+            if ignored_object in self.colliding_objects:
+                self.colliding_objects.remove(ignored_object)
 
         # более точно проверяем масками
-        for object in self.colliding_objects:
-            if self.mask.overlap(object.mask, get_mask_offset(self, object)) is None:
-                self.colliding_objects.remove(object)
+        colliding_objects = self.colliding_objects.copy()
+        for colliding_object in colliding_objects:
+            if self.mask.overlap(colliding_object.mask, get_mask_offset(self, colliding_object)) is None:
+                self.colliding_objects.remove(colliding_object)
 
     def explosion(self):
         """
         Убивает себя, перед этим нанося урон тому, чего касается
-        :param colliding_objects: объекты, с которыми есть столкновение
         """
-        for object in self.colliding_objects:
-            if self.mask.overlap(object.mask, get_mask_offset(self, object)):
-                object.hit(self)
+        colliding_objects = self.colliding_objects.copy()
+        for colliding_object in colliding_objects:
+            if self.mask.overlap(colliding_object.mask, get_mask_offset(self, colliding_object)):
+                colliding_object.hit(self)
 
         self.kill()
 

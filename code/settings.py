@@ -23,7 +23,7 @@ CONTROLS = {
     "shoot": pygame.K_SPACE
 }
 
-PLAYER_IMAGE = "../graphics/ship2.0.png"
+PLAYER_IMAGE = "../graphics/ships/ship2.0.png"
 PLAYER_POSITION = [WIDTH//2, HEIGHT//2]
 BACKGROUND_POSITION = [0, 0]
 # Скорость снарядов, запускаемых игроком

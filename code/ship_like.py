@@ -37,7 +37,7 @@ class ShipLike(Object):
         self.can_attack = True
         self.attack_cooldown = ship_info.attack_cooldown
 
-        self.projectile_speed = BULLET_SPEED
+        self.projectile_speed = projectile_info.speed
         self.damage = projectile_info.damage
 
         # Объекты, которые игнорируются выпускаемыми снарядами
@@ -110,6 +110,7 @@ class ShipLike(Object):
             self.angle = get_angle(self.velocity)
 
             self.image = pygame.transform.rotate(self.initial_image, math.degrees(self.angle))
+            self.mask = pygame.mask.from_surface(self.image)
             self.rect = self.image.get_rect()
             self.set_pos(old_center)
 

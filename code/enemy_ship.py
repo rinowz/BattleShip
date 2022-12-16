@@ -7,18 +7,17 @@ from player_shooting import PlayerShooting
 class EnemyShip(PlayerShooting):
     """ Вражеский корабль"""
 
-    def __init__(self, object_info, projectile_info, player):
+    def __init__(self, enemy_info, projectile_info, player):
         """
-        :param object_info: информация о создаваемом корабле
+        :param enemy_info: информация о создаваемом корабле
         :param projectile_info: информация о выпускаемых при выстреле снарядах
         :param hp: количество здоровья корабля
         """
 
-        super(EnemyShip, self).__init__(object_info, projectile_info, player)
+        super(EnemyShip, self).__init__(enemy_info, projectile_info, player)
 
-        self.detection_radius = 1000
-        self.stop_distance = 200
-        self.projectile_speed = BULLET_SPEED/2
+        self.detection_radius = enemy_info.detection_radius
+        self.stop_distance = enemy_info.stop_radius
 
     def update(self, dt):
         """
