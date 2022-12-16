@@ -34,6 +34,9 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        self.running = False
 
             # меняем игру и рисуем что нужно
             dt = time.time() - self.prev_time

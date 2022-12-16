@@ -15,12 +15,15 @@ BLUE = (0, 0, 255)
 
 LANGUAGE = 'english'
 
+FULLSCREEN = True
+
 CONTROLS = {
     "up": pygame.K_w,
     "down": pygame.K_s,
     "left": pygame.K_a,
     "right": pygame.K_d,
-    "shoot": pygame.K_SPACE
+    "shoot": pygame.K_SPACE,
+    "fullscreen": pygame.K_TAB
 }
 
 PLAYER_IMAGE = "../graphics/ships/ship2.0.png"
@@ -38,7 +41,7 @@ PLAYER_ACCELERATION = 2000
 PLAYER_DAMAGE = 10
 
 # граница, за которую не должны заходить спрайты ((x_min, x_max), (y_min, y_max))
-BORDERS = ((-10000, 10000), (-10000, 10000))
+BORDERS = ((-3000, 3000), (-3000, 3000))
 
 # UI
 HEALTH_BAR_POS = (30, 20)
@@ -47,3 +50,6 @@ HEALTH_BAR_HEIGHT = 20
 HEALTH_BAR_COLOR = RED
 BORDER_WIDTH = 2
 BORDER_COLOR = (48, 50, 64)
+
+TURRET_SIZE = 90
+TURRET_OFFSET = (-18, 0)

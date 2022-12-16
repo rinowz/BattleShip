@@ -71,6 +71,18 @@ class ShipLike(Object):
         if cooldown:
             self.cooldown()
 
+    def add_vel(self, dt):
+        super().add_vel(dt)
+
+        if self.pos[0] < BORDERS[0][0]:
+            self.set_pos((BORDERS[0][0], self.pos[1]))
+        if self.pos[0] > BORDERS[0][1]:
+            self.set_pos((BORDERS[0][1], self.pos[1]))
+        if self.pos[1] < BORDERS[1][0]:
+            self.set_pos((self.pos[0], BORDERS[1][0]))
+        if self.pos[1] > BORDERS[1][1]:
+            self.set_pos((self.pos[0], BORDERS[1][1]))
+
     def hit(self, hitter):
         """
         Нанесение урона объекту

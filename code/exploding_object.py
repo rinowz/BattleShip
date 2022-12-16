@@ -40,6 +40,12 @@ class ExplodingObject(Object):
     def find_collision(self):
         """ Меняет self.colliding_objects на объекты, с которыми есть столкновение"""
 
+        objects = self.collision_group.sprites()
+
+        for object in objects:
+            if not object.rect:
+                print(object)
+
         # проверяем с чем может сталкиваться объект
         self.colliding_objects = pygame.sprite.spritecollide(self, self.collision_group, False)
 

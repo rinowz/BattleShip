@@ -2,7 +2,7 @@
 import json
 import math
 from settings import *
-
+import os
 
 def get_loc_value(key):
     """
@@ -142,3 +142,52 @@ def get_direction(angle):
     :return: единичный вектор в направлении, заданном углом
     """
     return pygame.math.Vector2(math.cos(angle), -math.sin(angle))
+
+
+def open_image_folder(path):
+    """
+    Загружает изображения из папки
+    :param path:
+    :return: список из Surface изображений
+    """
+    images = []
+    for (dirpath, dirnames, filenames) in os.walk(path):
+        for filename in filenames:
+            images.append(pygame.image.load(os.path.join(dirpath, filename)).convert_alpha())
+
+    return images
+
+
+def load_image(path, angle=0):
+    """
+    Сокращает вызов загрузки изображения
+    :param path: путь к изображению относительно папки graphics
+    :param angle: угол, на который нужно повернуть изображение в градусах
+    :return: surface изображения
+    """
+
+    image_surf = pygame.image.load("../graphics/"+path)
+    if ".png" in path:
+        image_surf = image_surf.convert_alpha()
+
+    if angle != 0:
+        image_surf = pygame.transform.rotate(image_surf, angle)
+
+    return image_surf
+
+
+def generate_multiple(number, generating_function):
+    """
+    Создает необходимое количество объектов
+    :param number: количество объектов которые нужно создать
+    :param generating_function: функция создающая необходимые объекты
+    :return: список из объектов
+    """
+    generated_objects = []
+
+    for i in range(number):
+        generated_object = generating_function()
+        if generated_object:
+            generated_objects.append(generated_object)
+
+    return generated_objects

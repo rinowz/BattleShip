@@ -13,6 +13,10 @@ class Object(pygame.sprite.Sprite):
         self.image = object_info.image
         self.rect = self.image.get_rect()
         self.pos = [0, 0]
+
+        if object_info.pos is None:
+            self.kill()
+
         self.set_pos(object_info.pos)
         self.mask = pygame.mask.from_surface(self.image)
 

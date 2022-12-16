@@ -1,4 +1,6 @@
 """ Класс Turret"""
+import pygame
+
 from support import *
 from ship_like import ShipLike
 from player_shooting import PlayerShooting

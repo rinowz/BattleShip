@@ -1,4 +1,6 @@
 """ Уровень - создается при начатии "игры" игры и осуществляет всю работу до завершения"""
+import random
+
 import pygame
 from player import Player
 from settings import *
@@ -14,52 +16,15 @@ class Level:
     """ Уровень - происходит процесс "игры" игры"""
 
     def __init__(self):
-        self.display_surface = pygame.display.get_surface()
-        self.background_surf = pygame.image.load("../graphics/background.jpg")
-        self.background_rect = self.background_surf.get_rect(center=BACKGROUND_POSITION)
+        # начальные присваивания
+        self.initialization_start()
 
-        # группы
-        self.visible_sprites = self.CameraGroup()
-        self.collidable_sprites = pygame.sprite.Group()
+        # создаем игрока
+        self.player_setup()
 
-        # функция изменения слоя
-        self.layer_change = build_layer_change_function(self.visible_sprites)
-
-        # Информация об игроке
-        player_info = PlayerInfo(PLAYER_POSITION, [self.visible_sprites], layer_change=self.layer_change)
-        projectile_radius = 10
-        projectile_sprite = pygame.Surface((2*projectile_radius, 2*projectile_radius))
-        projectile_sprite.set_colorkey(BLACK)
-        pygame.draw.circle(projectile_sprite, WHITE, (projectile_radius, projectile_radius), projectile_radius)
-        projectile_info = ProjectileInfo([self.visible_sprites], self.visible_sprites, projectile_sprite,
-                                         layer_change=self.layer_change, damage=10)
-
-        # создание игрока
-        self.player = Player(self.collidable_sprites, player_info, projectile_info)
-        self.visible_sprites.player = self.player
-
-        self.rocks = []
-        # создаем камень
-        rock_image = pygame.image.load('../graphics/meteors/Meteor1.png').convert_alpha()
-
-        rock_info = ObjectInfo([0, 0], [self.visible_sprites], rock_image, (30, 30))
-        self.rocks.append(ExplodingObject(rock_info, self.visible_sprites))
-
-        enemy_image = pygame.transform.rotate(pygame.image.load(PLAYER_IMAGE).convert_alpha(), -90)
-        enemy_info = EnemyInfo((100, 100), [self.visible_sprites], layer_change=self.layer_change, max_speed=200,
-                              image=enemy_image, acceleration=50, attack_cooldown=2000, hp=20)
-        enemy1 = EnemyShip(enemy_info, projectile_info, self.player)
-
-        turret_platform_image = pygame.transform.scale(
-            pygame.image.load('../graphics/turret/gun_platform.png'), (90, 90))
-        turret_gun_image = pygame.transform.scale(
-            pygame.transform.rotate(pygame.image.load('../graphics/turret/gun.png'), -90), (90, 90))
-        turret_projectile = ProjectileInfo([self.visible_sprites], self.visible_sprites, projectile_sprite,
-                                         layer_change=self.layer_change, damage=10, speed=BULLET_SPEED/2)
-        turret_info = TurretInfo((200, 300), [self.visible_sprites], attack_cooldown=2000, hp=20,
-                                 image=turret_platform_image, gun_image=turret_gun_image,
-                                 layer_change=self.layer_change, gun_offset=(-18, 0), acceleration=math.pi/2)
-        turret1 = Turret(turret_info, turret_projectile, self.player)
+        # генерируем карту
+        generator = self.MapGenerator(self.visible_sprites, BORDERS, self.images, self.layer_change, self.player)
+        object_list = generator.generate(10, 10, 10)
 
         # UI
         self.ui = UI(self.player)
@@ -78,6 +43,44 @@ class Level:
         self.visible_sprites.offset_draw(dt)
 
         self.ui.display()
+
+    def load_images(self):
+        self.images['enemy'] = load_image("ships/ship2.0.png", -90)
+        self.images['meteors'] = open_image_folder("../graphics/meteors")
+        self.images['turret'] = {
+            'platform': pygame.transform.scale(load_image("turret/gun_platform.png"), (TURRET_SIZE, TURRET_SIZE)),
+            "gun": pygame.transform.scale(load_image("turret/gun.png", -90), (TURRET_SIZE, TURRET_SIZE))}
+
+    def initialization_start(self):
+        """ Производит начальную установку уровня"""
+        self.images = {}
+        self.load_images()
+
+        self.display_surface = pygame.display.get_surface()
+        self.background_surf = pygame.image.load("../graphics/background.jpg")
+        self.background_rect = self.background_surf.get_rect(center=BACKGROUND_POSITION)
+
+        # группы
+        self.visible_sprites = self.CameraGroup()
+        self.collidable_sprites = pygame.sprite.Group()
+
+        # функция изменения слоя
+        self.layer_change = build_layer_change_function(self.visible_sprites)
+
+    def player_setup(self):
+        """ Создает игрока"""
+        # Информация об игроке
+        player_info = PlayerInfo(PLAYER_POSITION, [self.visible_sprites], layer_change=self.layer_change)
+        projectile_radius = 10
+        projectile_sprite = pygame.Surface((2*projectile_radius, 2*projectile_radius))
+        projectile_sprite.set_colorkey(BLACK)
+        pygame.draw.circle(projectile_sprite, WHITE, (projectile_radius, projectile_radius), projectile_radius)
+        projectile_info = ProjectileInfo([self.visible_sprites], self.visible_sprites, projectile_sprite,
+                                         layer_change=self.layer_change, damage=10)
+
+        # создание игрока
+        self.player = Player(self.collidable_sprites, player_info, projectile_info)
+        self.visible_sprites.player = self.player
 
     class CameraGroup(pygame.sprite.LayeredUpdates):
         """ Отражает существование камеры. Такая же фигня, как и pygame.sprite.LayeredUpdates,
@@ -121,6 +124,7 @@ class Level:
                 pos = round_list(add_lists(sprite.rect.center, offset))
 
                 rect = sprite.image.get_rect(center=pos)
+
                 self.display_surface.blit(sprite.image, rect)
 
         def antiposition_calculation(self, dt):
@@ -156,3 +160,143 @@ class Level:
                 self.camera_antiposition[0] = center_pos[0]
             if abs(camera_velocity.y * dt) > abs(distance.y) and abs(camera_velocity.y) > abs(self.player.velocity.y):
                 self.camera_antiposition[1] = center_pos[1]
+
+    class MapGenerator:
+        """ Генерирует объекты на карте"""
+
+        def __init__(self, visible_group, borders, images, layer_change, player):
+            self.visible_group = visible_group
+            self.borders = borders
+            self.images = images
+            self.layer_change = layer_change
+            self.player = player
+
+            random.seed()
+
+            self.stage = 'initialization'
+
+        def generate(self, enemy_count, turret_count, meteor_count):
+            """
+            Генерирует объекты на карте
+            :param enemy_count: необходимое количество вражеских кораблей
+            :param turret_count: необходимое количество турелей
+            :param meteor_count: необходимое количество метеоритов
+            :return: Список из списков со всеми типами созданных объектов
+            """
+
+            self.stage = 'enemy'
+            enemies = generate_multiple(enemy_count, self.generate_enemy)
+
+            self.stage = 'turret'
+            turrets = generate_multiple(turret_count, self.generate_turret)
+
+            self.stage = 'meteor'
+            meteors = generate_multiple(meteor_count, self.generate_meteor)
+
+            return [enemies, turrets, meteors]
+
+        def generate_enemy(self):
+            """ Создает объект EnemyShip и возвращает"""
+            image = self.images['enemy']
+            pos = self.get_pos(image.get_rect())
+            groups = self.visible_group
+            vel = (0, 0)
+            layer_change = self.layer_change
+            attack_cooldown = random.randint(1000, 5000)
+            max_speed = random.randint(100, 500)
+            acceleration = max_speed / random.uniform(5, 10)
+            hp = random.randint(10, 30)
+            attack_radius = 500
+            detection_radius = 1000
+            stop_radius = 300
+
+            enemy_info = EnemyInfo(pos, groups, image, vel, layer_change, attack_cooldown, max_speed,
+                      acceleration, hp, attack_radius, detection_radius, stop_radius)
+
+            return EnemyShip(enemy_info, self.generate_projectile(), self.player)
+
+        def generate_turret(self):
+            """ Генерирует объект Turret и возвращает"""
+            image = self.images['turret']['platform']
+            gun_image = self.images['turret']['gun']
+            pos = self.get_pos(image.get_rect().inflate(100, 100))
+            groups = [self.visible_group]
+            gun_offset = TURRET_OFFSET
+            gun_angle = 0
+            layer_change = self.layer_change
+            attack_cooldown = random.randint(1000, 5000)
+            acceleration = random.uniform(1.5, 4.5)
+            hp = random.randint(10, 50)
+            attack_radius = 500
+
+            turret_info = TurretInfo(pos, groups, image, gun_image, gun_offset, gun_angle, layer_change,
+                                     attack_cooldown, acceleration, hp, attack_radius)
+
+            return Turret(turret_info, self.generate_projectile(), self.player)
+
+        def generate_projectile(self):
+            """
+            Генерирует информацию о снаряде
+            :return: Объект ProjectileInfo
+            """
+            groups = [self.visible_group]
+            collision_group = self.visible_group
+
+            radius = 10
+            image = pygame.Surface((2 * radius, 2 * radius))
+            image.set_colorkey(BLACK)
+            pygame.draw.circle(image, WHITE, (radius, radius), radius)
+
+            layer_change = self.layer_change
+            damage = random.uniform(1, 10)
+            speed = random.randint(500, 1500)
+
+            return ProjectileInfo(groups, collision_group, image, layer_change, damage, speed)
+
+        def generate_meteor(self):
+            """ Генерирует метеорит и возвращает объект ExplodingObject"""
+
+            image = random.choice(self.images['meteors'])
+            pos = self.get_pos(image.get_rect())
+            groups = [self.visible_group]
+            layer_change = self.layer_change
+            vel = (random.randint(-500, 500), random.randint(-500, 500))
+
+            meteor_info = ObjectInfo(pos, groups, image, vel, layer_change)
+
+            return ExplodingObject(meteor_info, self.visible_group)
+
+        def get_pos(self, rect):
+            """
+            Находит место на карте, чтобы поместить rect
+            :param: rect: Прямоугольник, который должен поместиться на карте. Передавать то, позицию чего не жалко
+            :return: список из координат x, y - расположение центра
+            """
+
+            for i in range(100):
+                x_pos = random.randint(self.borders[0][0], self.borders[0][1])
+                y_pos = random.randint(self.borders[1][0], self.borders[1][1])
+
+                pos = (x_pos, y_pos)
+                rect.center = pos
+
+                if self.check_collision(rect):
+                    return pos
+
+            print('Couldn\'t place ' + self.stage + 'in', self.borders)
+            return None
+
+        def check_collision(self, rect):
+            """
+            Проверяет сталкивается ли прямоугольник с чем-то из видимой группы, чтобы можно было его создать
+            :param rect: прямоугольник, который проверяется
+            :return: True если нет столкновений
+            """
+
+            check_sprite = pygame.sprite.Sprite()
+            check_sprite.rect = rect
+
+            if pygame.sprite.spritecollideany(check_sprite, self.visible_group):
+                return False
+
+            return True
