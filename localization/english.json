@@ -1,3 +1,7 @@
 {
-  "game_name": "BattleShip"
+  "game_name": "BattleShip",
+  "game_over_main_menu": "Main menu",
+  "game_over_restart": "Restart",
+  "game_over_victory": "Congratulations!",
+  "game_over_loss": "You lost"
 }

@@ -9,19 +9,21 @@ from support import *
 class ObjectInfo:
     """ Информация о создаваемом объекте"""
 
-    def __init__(self, pos, groups, image=pygame.Surface((50, 50)), vel=(0, 0), layer_change=useless):
+    def __init__(self, pos, groups, image=pygame.Surface((50, 50)), vel=(0, 0), layer_change=useless, damage=1):
         """
         :param pos: Позиция объекта - итерируемый со значениями для x и y
         :param groups: группы, в которые нужно включить спрайт
         :param image: surface изображения объекта
         :param vel: начальная скорость - итерируемый из 2 элементов, который превращается в Vector2
         :param layer_change: - функция изменения слоя объекта
+        :param damage: Урон, который объект может(?) нанести
         """
         self.pos = pos
         self.groups = groups
         self.image = image
         self.vel = vel
         self.layer_change = layer_change
+        self.damage = damage
 
 
 class ProjectileInfo:
@@ -51,13 +53,14 @@ class ProjectileInfo:
         :param vel: начальная скорость - итерируемый из 2 элементов, который превращается в Vector2
         """
 
-        return ObjectInfo(pos, self.groups, self.image, vel, self.layer_change)
+        return ObjectInfo(pos, self.groups, self.image, vel, self.layer_change, self.damage)
 
 
 class ShipInfo(ObjectInfo):
     """ Информация об объекте ShipLike"""
     def __init__(self, pos, groups, image=pygame.Surface((50, 50)), vel=(0, 0), layer_change=useless,
-                 attack_cooldown=PLAYER_COOLDOWN, max_speed=PLAYER_MAX_SPEED, acceleration=PLAYER_ACCELERATION, hp=100):
+                 attack_cooldown=PLAYER_COOLDOWN, max_speed=PLAYER_MAX_SPEED, acceleration=PLAYER_ACCELERATION, hp=100,
+                 damage=5):
         """
         :param pos: Позиция объекта - итерируемый со значениями для x и y
         :param groups: группы, в которые нужно включить спрайт
@@ -68,9 +71,9 @@ class ShipInfo(ObjectInfo):
         :param max_speed: максимальная скорость
         :param acceleration: насколько меняется скорость, когда корабль пытается ее изменить
         :param hp: количество здоровья
-        :param projectile_speed: скорость выпускаемых снарядов
+        :param damage: урон, наносимый при столкновении
         """
-        super().__init__(pos, groups, image, vel, layer_change)
+        super().__init__(pos, groups, image, vel, layer_change, damage)
 
         self.attack_cooldown = attack_cooldown
         self.max_speed = max_speed
@@ -98,7 +101,7 @@ class EnemyInfo(ShipInfo):
     """ Информация о вражеском корабле"""
     def __init__(self, pos, groups, image=pygame.Surface((50, 50)), vel=(0, 0), layer_change=useless,
                  attack_cooldown=PLAYER_COOLDOWN, max_speed=PLAYER_MAX_SPEED, acceleration=PLAYER_ACCELERATION, hp=100,
-                 attack_radius=400, detection_radius=1000, stop_radius=200):
+                 attack_radius=400, detection_radius=1000, stop_radius=200, damage=5):
         """
         :param pos: Позиция объекта - итерируемый со значениями для x и y
         :param groups: группы, в которые нужно включить спрайт
@@ -112,8 +115,9 @@ class EnemyInfo(ShipInfo):
         :param attack_radius: расстояние начиная с которого противник начинает стрелять по игроку
         :param detection_radius: расстояние начиная с которого противник начинает приближаться к игроку
         :param stop_radius: расстояние, на котором противник останавливается
+        :param damage: урон, наносимый при столкновении
         """
-        super().__init__(pos, groups, image, vel, layer_change, attack_cooldown, max_speed, acceleration, hp)
+        super().__init__(pos, groups, image, vel, layer_change, attack_cooldown, max_speed, acceleration, hp, damage)
 
         self.attack_radius = attack_radius
         self.detection_radius = detection_radius
@@ -137,6 +141,7 @@ class TurretInfo(ShipInfo):
         :param attack_cooldown: время, которое занимает кулдаун при атаке
         :param acceleration: насколько меняется угол, когда турель пытается ее изменить
         :param hp: количество здоровья
+        :param attack_radius: максимальное расстояние, с которого турель будет атаковать игрока
         """
         super().__init__(pos, groups, image, (0, 0), layer_change,
                          attack_cooldown, 0, acceleration, hp)

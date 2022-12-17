@@ -23,7 +23,7 @@ class Object(pygame.sprite.Sprite):
         self.layer_change = object_info.layer_change
 
         # Урон наносимый при атаке других объектов. Не совсем логичное место объявлять, но пусть будет на всякий случай
-        self.damage = 1
+        self.damage = object_info.damage
 
         # вектор скорости объекта
         self.velocity = pygame.Vector2(object_info.vel)

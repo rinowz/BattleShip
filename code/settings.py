@@ -23,7 +23,8 @@ CONTROLS = {
     "left": pygame.K_a,
     "right": pygame.K_d,
     "shoot": pygame.K_SPACE,
-    "fullscreen": pygame.K_TAB
+    "fullscreen": pygame.K_TAB,
+    "nuclear_launch": pygame.K_b
 }
 
 PLAYER_IMAGE = "../graphics/ships/ship2.0.png"
@@ -53,3 +54,5 @@ BORDER_COLOR = (48, 50, 64)
 
 TURRET_SIZE = 90
 TURRET_OFFSET = (-18, 0)
+
+TARGET_POS = (2500, 2500)

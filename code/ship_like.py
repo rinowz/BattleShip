@@ -37,8 +37,7 @@ class ShipLike(Object):
         self.can_attack = True
         self.attack_cooldown = ship_info.attack_cooldown
 
-        self.projectile_speed = projectile_info.speed
-        self.damage = projectile_info.damage
+        self.damage += projectile_info.damage
 
         # Объекты, которые игнорируются выпускаемыми снарядами
         self.no_hit_objects = [self]
@@ -97,23 +96,32 @@ class ShipLike(Object):
         """ Уничтожение объекта"""
         self.kill()
 
-    def shoot(self):
+    def shoot(self, info=None):
         """ Стреляет объектом типа ExplodingObject"""
-        projectile_vel = self.projectile_speed * pygame.math.Vector2(math.cos(self.angle), -math.sin(self.angle))
 
-        projectile = ExplodingObject(self.projectile_info.get_object_info(self.pos, projectile_vel),
-                                     self.projectile_info.collision_group)
-        projectile.damage = self.damage
+        if info is None:
+            info = self.projectile_info
+
+        projectile_vel = info.speed * pygame.math.Vector2(math.cos(self.angle), -math.sin(self.angle))
+
+        projectile = ExplodingObject(info.get_object_info(self.pos, projectile_vel),
+                                     info.collision_group)
         projectile.exclude_collision_list(self.no_hit_objects)
 
-    def shooting(self):
-        """ Вызывается для произведения выстрела"""
-        if self.can_attack and self.to_shoot():
-            self.shoot()
+    def shooting(self, info=None, ignore_to_shoot=False):
+        """
+        Вызывается для произведения выстрела
+        :return: True если выстрел произведен
+        """
+        if self.can_attack and (self.to_shoot() or ignore_to_shoot):
+            self.shoot(info)
 
             # устанавливаем кулдаун
             self.shoot_time = pygame.time.get_ticks()
             self.can_attack = False
+
+            return True
+        return False
 
     def rotate_image(self):
         """ Поворачивает начальное изображение на угол отклонения скорости от вертикального направления вверх"""

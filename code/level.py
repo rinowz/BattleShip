@@ -1,6 +1,5 @@
 """ Уровень - создается при начатии "игры" игры и осуществляет всю работу до завершения"""
 import random
-
 import pygame
 from player import Player
 from settings import *
@@ -10,12 +9,16 @@ from exploding_object import ExplodingObject
 from enemy_ship import EnemyShip
 from ui import UI
 from turret import Turret
+from target import Target
 
 
 class Level:
     """ Уровень - происходит процесс "игры" игры"""
 
-    def __init__(self):
+    def __init__(self, change_game_state):
+        # Функция смены сцены в игре
+        self.change_game_state = change_game_state
+
         # начальные присваивания
         self.initialization_start()
 
@@ -26,11 +29,20 @@ class Level:
         generator = self.MapGenerator(self.visible_sprites, BORDERS, self.images, self.layer_change, self.player)
         object_list = generator.generate(10, 10, 10)
 
+        # создание цели
+        self.target_setup()
+
         # UI
         self.ui = UI(self.player)
 
     def run(self, dt):
+        if not self.player.alive():
+            self.game_result = 'loss'
+            self.change_game_state('game_over')
+            return
+
         """ Обновляет и рисует игру"""
+        self.display_surface.fill(BLACK)
 
         # достаем смещение камеры из объекта self.visible_sprites класса CameraGroup,
         # "камеру" котрой мы используем в уровне
@@ -67,20 +79,44 @@ class Level:
         # функция изменения слоя
         self.layer_change = build_layer_change_function(self.visible_sprites)
 
+        self.game_result = 'nothing'
+
     def player_setup(self):
         """ Создает игрока"""
         # Информация об игроке
         player_info = PlayerInfo(PLAYER_POSITION, [self.visible_sprites], layer_change=self.layer_change)
         projectile_radius = 10
-        projectile_sprite = pygame.Surface((2*projectile_radius, 2*projectile_radius))
-        projectile_sprite.set_colorkey(BLACK)
-        pygame.draw.circle(projectile_sprite, WHITE, (projectile_radius, projectile_radius), projectile_radius)
-        projectile_info = ProjectileInfo([self.visible_sprites], self.visible_sprites, projectile_sprite,
+        projectile_image = pygame.Surface((2*projectile_radius, 2*projectile_radius))
+        projectile_image.set_colorkey(BLACK)
+        pygame.draw.circle(projectile_image, WHITE, (projectile_radius, projectile_radius), projectile_radius)
+        projectile_info = ProjectileInfo([self.visible_sprites], self.visible_sprites, projectile_image,
                                          layer_change=self.layer_change, damage=10)
 
+        nuclear_image = pygame.Surface((2 * projectile_radius, 2 * projectile_radius))
+        nuclear_image.set_colorkey(BLACK)
+        pygame.draw.circle(nuclear_image, GREEN, (projectile_radius, projectile_radius), projectile_radius)
+        nuclear_info = ProjectileInfo([self.visible_sprites], self.visible_sprites, nuclear_image, self.layer_change,
+                                      1000, 1000)
+
         # создание игрока
-        self.player = Player(self.collidable_sprites, player_info, projectile_info)
+        self.player = Player(self.collidable_sprites, player_info, projectile_info, nuclear_info)
         self.visible_sprites.player = self.player
+        self.player.nuclear_count = 10
+
+    def target_setup(self):
+        """ Проводит создание цели, которую нужно уничтожить игроку"""
+        radius = 100
+        image = pygame.Surface((2 * radius, 2 * radius))
+        image.set_colorkey(BLACK)
+        pygame.draw.circle(image, BLUE, (radius, radius), radius)
+
+        target_info = ObjectInfo((0, 0), [self.visible_sprites], image, layer_change=self.layer_change)
+
+        self.target = Target(target_info, self.end_level)
+
+    def end_level(self, game_result):
+        self.game_result = game_result
+        self.change_game_state('game_over')
 
     class CameraGroup(pygame.sprite.LayeredUpdates):
         """ Отражает существование камеры. Такая же фигня, как и pygame.sprite.LayeredUpdates,
@@ -209,9 +245,10 @@ class Level:
             attack_radius = 500
             detection_radius = 1000
             stop_radius = 300
+            damage = 5
 
             enemy_info = EnemyInfo(pos, groups, image, vel, layer_change, attack_cooldown, max_speed,
-                      acceleration, hp, attack_radius, detection_radius, stop_radius)
+                      acceleration, hp, attack_radius, detection_radius, stop_radius, damage)
 
             return EnemyShip(enemy_info, self.generate_projectile(), self.player)
 
