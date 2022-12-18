@@ -30,7 +30,7 @@ CONTROLS = {
 
 PLAYER_IMAGE = "../graphics/ships/ship2.0.png"
 PLAYER_POSITION = [WIDTH//2, HEIGHT//2]
-BACKGROUND_POSITION = [0, 0]
+BACKGROUND_POSITION = [-WIDTH//2, -HEIGHT//2]
 # Скорость снарядов, запускаемых игроком
 BULLET_SPEED = 2000
 # Кулдаун выстрелов игрока
@@ -43,7 +43,7 @@ PLAYER_ACCELERATION = 2000
 PLAYER_DAMAGE = 10
 
 # граница, за которую не должны заходить спрайты ((x_min, x_max), (y_min, y_max))
-BORDERS = ((-3000, 3000), (-3000, 3000))
+BORDERS = ((-4500, 4500), (-4500, 4500))
 
 # UI
 HEALTH_BAR_POS = (30, 20)

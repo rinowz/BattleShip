@@ -25,6 +25,8 @@ class Level(Scene):
         # начальные присваивания
         self.initialization_start()
 
+        self.background_setup()
+
         # создаем игрока
         self.player_setup()
 
@@ -34,7 +36,7 @@ class Level(Scene):
         # генерируем карту
         generator = self.MapGenerator(self.visible_sprites, BORDERS, self.images, self.sound,
                                       self.layer_change, self.player)
-        object_list = generator.generate(10, 10, 10)
+        object_list = generator.generate(50, 50, 50)
 
         # UI
         self.ui = UI(self.player)
@@ -56,11 +58,10 @@ class Level(Scene):
 
         self.display_surface.fill(BLACK)
 
-        # достаем смещение камеры из объекта self.visible_sprites класса CameraGroup,
-        # "камеру" котрой мы используем в уровне
-        offset = minus(self.visible_sprites.camera_position)
-        self.background_rect.center = round_list(add_lists(offset, BACKGROUND_POSITION))
-        self.display_surface.blit(self.background_surf, self.background_rect)
+        # задний фон
+        for rect in self.background_rects:
+            offset = minus(self.visible_sprites.camera_position)
+            self.display_surface.blit(self.background_surf, round_list(add_lists(offset, rect.center)))
 
         # видимые объекты группы CameraGroup
         self.visible_sprites.update(dt)
@@ -100,9 +101,6 @@ class Level(Scene):
         mixer.music.fadeout(500)
         mixer.music.load('../sound/fon.mp3')
         mixer.music.play(-1, 0, 500)
-
-        self.background_surf = pygame.image.load("../graphics/background.jpg")
-        self.background_rect = self.background_surf.get_rect(center=BACKGROUND_POSITION)
 
         # группы
         self.visible_sprites = self.CameraGroup()
@@ -146,6 +144,23 @@ class Level(Scene):
 
     def finish_initialization(self):
         pygame.mouse.set_visible(False)
+
+    def background_setup(self):
+        """ Создает изображение и прямоугольники для фона"""
+
+        self.background_surf = pygame.image.load("../graphics/backgrounds/background.jpg")
+
+        # достаем смещение камеры из объекта self.visible_sprites класса CameraGroup,
+        # "камеру" котрой мы используем в уровне
+        first_pos = BACKGROUND_POSITION
+        step_x = 2560
+        step_y = 1600
+
+        self.background_rects = []
+        for x_index in range(-2, 3):
+            for y_index in range(-3, 4):
+                self.background_rects.append(
+                    self.background_surf.get_rect(center=add_lists(first_pos, (step_x*x_index, step_y*y_index))))
 
     class CameraGroup(pygame.sprite.LayeredUpdates):
         """ Отражает существование камеры. Такая же фигня, как и pygame.sprite.LayeredUpdates,
