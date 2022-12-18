@@ -32,7 +32,8 @@ class Level(Scene):
         self.target_setup()
 
         # генерируем карту
-        generator = self.MapGenerator(self.visible_sprites, BORDERS, self.images, self.layer_change, self.player)
+        generator = self.MapGenerator(self.visible_sprites, BORDERS, self.images, self.sound,
+                                      self.layer_change, self.player)
         object_list = generator.generate(10, 10, 10)
 
         # UI
@@ -43,17 +44,16 @@ class Level(Scene):
 
     def run(self, dt, mouse_click):
         super(Level, self).run(dt, mouse_click)
-
+        # обработка паузы игры
         if self.paused:
             self.ui.display()
             return
 
+        # конец игры
         if not self.player.alive():
-            self.game_result = 'loss'
-            self.change_game_state('game_over')
+            self.end_level('loss')
             return
 
-        """ Обновляет и рисует игру"""
         self.display_surface.fill(BLACK)
 
         # достаем смещение камеры из объекта self.visible_sprites класса CameraGroup,
@@ -71,18 +71,35 @@ class Level(Scene):
     def toggle_pause(self):
         self.paused = not self.paused
         self.ui.paused = self.paused
+        pygame.mouse.set_visible(self.paused)
 
     def load_images(self):
-        self.images['enemy'] = load_image("ships/ship2.0.png", -90)
+        """ Загружает используемые изображения"""
         self.images['meteors'] = open_image_folder("../graphics/meteors")
         self.images['turret'] = {
             'platform': pygame.transform.scale(load_image("turret/gun_platform.png"), (TURRET_SIZE, TURRET_SIZE)),
             "gun": pygame.transform.scale(load_image("turret/gun.png", -90), (TURRET_SIZE, TURRET_SIZE))}
+        self.images['enemy_projectile'] = load_image("projectiles/laserBlue.png", -90)
+        self.images['nuclear_bomb'] = load_image('projectiles/bomb.png', -90)
+        self.images['player_projectile'] = pygame.transform.scale(load_image('projectiles/laserRed.png', -90), (82, 20))
+        self.images['enemy_ship'] = load_image('ships/enemy_ship.png', -90)
+
+    def set_sound(self):
+        """ Определяет используемый звук"""
+        self.sound['hit'] = pygame.mixer.Sound('../sound/hit.mp3')
+        self.sound['shot'] = pygame.mixer.Sound('../sound/shot.mp3')
 
     def initialization_start(self):
         """ Производит начальную установку уровня"""
         self.images = {}
         self.load_images()
+        self.sound = {}
+        self.set_sound()
+
+        # запускаем музыку
+        mixer.music.fadeout(500)
+        mixer.music.load('../sound/fon.mp3')
+        mixer.music.play(-1, 0, 500)
 
         self.background_surf = pygame.image.load("../graphics/background.jpg")
         self.background_rect = self.background_surf.get_rect(center=BACKGROUND_POSITION)
@@ -100,18 +117,11 @@ class Level(Scene):
         """ Создает игрока"""
         # Информация об игроке
         player_info = PlayerInfo(PLAYER_POSITION, [self.visible_sprites], layer_change=self.layer_change)
-        projectile_radius = 10
-        projectile_image = pygame.Surface((2*projectile_radius, 2*projectile_radius))
-        projectile_image.set_colorkey(BLACK)
-        pygame.draw.circle(projectile_image, WHITE, (projectile_radius, projectile_radius), projectile_radius)
-        projectile_info = ProjectileInfo([self.visible_sprites], self.visible_sprites, projectile_image,
+        projectile_info = ProjectileInfo([self.visible_sprites], self.visible_sprites, self.images['player_projectile'],
                                          layer_change=self.layer_change, damage=10)
 
-        nuclear_image = pygame.Surface((2 * projectile_radius, 2 * projectile_radius))
-        nuclear_image.set_colorkey(BLACK)
-        pygame.draw.circle(nuclear_image, GREEN, (projectile_radius, projectile_radius), projectile_radius)
-        nuclear_info = ProjectileInfo([self.visible_sprites], self.visible_sprites, nuclear_image, self.layer_change,
-                                      1000, 1000)
+        nuclear_info = ProjectileInfo([self.visible_sprites], self.visible_sprites, self.images['nuclear_bomb'],
+                                      self.layer_change, 1000, 1000)
 
         # создание игрока
         self.player = Player(self.collidable_sprites, player_info, projectile_info, nuclear_info)
@@ -131,10 +141,11 @@ class Level(Scene):
 
     def end_level(self, game_result):
         self.game_result = game_result
+        pygame.mixer.music.fadeout(500)
         self.change_game_state('game_over')
 
-    def __del__(self):
-        pass
+    def finish_initialization(self):
+        pygame.mouse.set_visible(False)
 
     class CameraGroup(pygame.sprite.LayeredUpdates):
         """ Отражает существование камеры. Такая же фигня, как и pygame.sprite.LayeredUpdates,
@@ -218,10 +229,11 @@ class Level(Scene):
     class MapGenerator:
         """ Генерирует объекты на карте"""
 
-        def __init__(self, visible_group, borders, images, layer_change, player):
+        def __init__(self, visible_group, borders, images, sound, layer_change, player):
             self.visible_group = visible_group
             self.borders = borders
             self.images = images
+            self.sound = sound
             self.layer_change = layer_change
             self.player = player
 
@@ -251,7 +263,7 @@ class Level(Scene):
 
         def generate_enemy(self):
             """ Создает объект EnemyShip и возвращает"""
-            image = self.images['enemy']
+            image = self.images['enemy_ship']
             pos = self.get_pos(image.get_rect())
             groups = self.visible_group
             vel = (0, 0)
@@ -264,9 +276,11 @@ class Level(Scene):
             detection_radius = 1000
             stop_radius = 300
             damage = 5
+            hit_sound = self.sound['hit']
+            shot_sound = self.sound['shot']
 
             enemy_info = EnemyInfo(pos, groups, image, vel, layer_change, attack_cooldown, max_speed,
-                      acceleration, hp, attack_radius, detection_radius, stop_radius, damage)
+                      acceleration, hp, attack_radius, detection_radius, stop_radius, damage, hit_sound, shot_sound)
 
             return EnemyShip(enemy_info, self.generate_projectile(), self.player)
 
@@ -297,10 +311,7 @@ class Level(Scene):
             groups = [self.visible_group]
             collision_group = self.visible_group
 
-            radius = 10
-            image = pygame.Surface((2 * radius, 2 * radius))
-            image.set_colorkey(BLACK)
-            pygame.draw.circle(image, WHITE, (radius, radius), radius)
+            image = self.images['enemy_projectile']
 
             layer_change = self.layer_change
             damage = random.uniform(1, 10)

@@ -3,6 +3,7 @@ import json
 import math
 from settings import *
 import os
+from pygame import mixer
 
 
 def get_loc_values():
@@ -189,3 +190,4 @@ def generate_multiple(number, generating_function):
             generated_objects.append(generated_object)
 
     return generated_objects
+

@@ -9,6 +9,7 @@ from main_menu import MainMenu
 from menu_about import About
 from menu_how_to_play import HowToPlay
 from menu_settings import Settings
+from pygame import mixer
 
 
 class Game:
@@ -16,20 +17,30 @@ class Game:
 
     def __init__(self):
         """ Запускается pygame и устанавливаются необходимые переменные"""
-
+        # данные локализации
         self.loc_values = get_loc_values()
 
+        # запускаем pygame
         pygame.init()
+        mixer.init()
+
+        # устанавливаем экран
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption(self.loc_values["game_name"])
 
+        # устанавливаем часы
         self.clock = pygame.time.Clock()
         self.running = True
         # состояние игры - сцена, которая должна отображаться
+        self.state = 'nothing'
         self.change_game_state(DEFAULT_STATE)
 
         self.prev_time = time.time()
-        # self.game_over = GameOver('victory', self.change_game_state, self.loc_values)
+
+        # меняем курсор
+        cursor_surf = pygame.image.load('../graphics/menu/cursor2.png')
+        game_cursor = pygame.cursors.Cursor((0, 0), cursor_surf)
+        pygame.mouse.set_cursor(game_cursor)
 
     def run(self):
         """ Основной цикл pygame"""
@@ -62,6 +73,13 @@ class Game:
 
     def change_game_state(self, state):
         """ Меняет состояние игры"""
+
+        # музыка появляется, если входить в меню
+        menu_scenes = ("about", "how_to_play", "settings", "main_menu")
+        if state in menu_scenes and self.state not in menu_scenes:
+            mixer.music.load('../sound/fonovai.mp3')
+            mixer.music.play(-1, 3.3, 500)
+
         self.state = state
 
         if self.state == 'exit':

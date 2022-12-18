@@ -4,6 +4,8 @@ from pyvidplayer import Video
 from settings import *
 from button import Button
 from scene import Scene
+from pygame import mixer
+from support import *
 
 
 class GameOver(Scene):
@@ -35,6 +37,11 @@ class GameOver(Scene):
         else:
             self.playing_video = False
 
+        pygame.mouse.set_visible(False)
+
+        # используемая музыка
+        self.music = {"victory": "../sound/endgame.mp3", "loss": "../sound/gameover.mp3"}
+
     def run(self, dt, mouse_click):
         super(GameOver, self).run(dt, mouse_click)
 
@@ -58,7 +65,9 @@ class GameOver(Scene):
             if self.video.get_paused():
                 self.finished_initialization = False
             else:
+                pygame.mixer.music.stop()
                 self.display_buttons = False
+                pygame.mouse.set_visible(False)
 
     def display_game_over_text(self):
         """ Выводит надпись о завершении игры"""
@@ -73,20 +82,31 @@ class GameOver(Scene):
         first_h = HEIGHT*0.5-0.25*button_size[1]
         button_space = 1.4*button_size[1]
 
+        sound = mixer.Sound('../sound/buttonclick.mp3')
+
+        button_image = load_image('../graphics/menu/buttonBlue.png')
+
         self.buttons.append(
             Button((WIDTH*0.5, first_h), size=button_size,
-                   text=self.loc_data['main_menu'], text_color=WHITE, font=button_font,
-                   on_click=lambda: self.change_game_state('main_menu')))
+                   text=self.loc_data['main_menu'], text_color=BLUE, font=button_font,
+                   on_click=lambda: self.change_game_state('main_menu'), sound=sound, image=button_image,
+                   hover_image=button_image))
         self.buttons.append(
             Button((WIDTH*0.5, first_h + button_space), size=button_size,
-                   text=self.loc_data['restart'], text_color=WHITE, font=button_font,
-                   on_click=lambda: self.change_game_state('play')))
+                   text=self.loc_data['restart'], text_color=BLUE, font=button_font,
+                   on_click=lambda: self.change_game_state('play'), sound=sound, image=button_image,
+                   hover_image=button_image))
         self.buttons.append(
             Button((WIDTH*0.5, first_h + 2*button_space), size=button_size,
-                   text=self.loc_data['exit'], text_color=WHITE, font=button_font,
-                   on_click=lambda: self.change_game_state('exit')))
+                   text=self.loc_data['exit'], text_color=BLUE, font=button_font,
+                   on_click=lambda: self.change_game_state('exit'), sound=sound, image=button_image,
+                   hover_image=button_image))
 
     def finish_initialization(self):
         """ Производит создание необходимых элементов экрана после завершения видео"""
+        pygame.mixer.music.load(self.music[self.result])
+        pygame.mixer.music.play()
+
         self.display_game_over_text()
         self.display_buttons = True
+        pygame.mouse.set_visible(True)

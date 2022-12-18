@@ -39,6 +39,9 @@ class ShipLike(Object):
 
         self.damage += projectile_info.damage
 
+        self.hit_sound = ship_info.hit_sound
+        self.shot_sound = ship_info.shot_sound
+
         # Объекты, которые игнорируются выпускаемыми снарядами
         self.no_hit_objects = [self]
 
@@ -99,12 +102,14 @@ class ShipLike(Object):
     def shoot(self, info=None):
         """ Стреляет объектом типа ExplodingObject"""
 
+        self.shot_sound.play()
+
         if info is None:
             info = self.projectile_info
 
         projectile_vel = info.speed * pygame.math.Vector2(math.cos(self.angle), -math.sin(self.angle))
 
-        projectile = ExplodingObject(info.get_object_info(self.pos, projectile_vel),
+        projectile = ExplodingObject(info.get_object_info(self.pos, projectile_vel, angle=self.angle),
                                      info.collision_group)
         projectile.exclude_collision_list(self.no_hit_objects)
 

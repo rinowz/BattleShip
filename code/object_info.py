@@ -46,21 +46,24 @@ class ProjectileInfo:
         self.damage = damage
         self.speed = speed
 
-    def get_object_info(self, pos, vel):
+    def get_object_info(self, pos, vel, angle):
         """
         Создает экземпляр класса object_info основываясь на своих и переданных данных
         :param pos: Позиция объекта - итерируемый со значениями для x и y
         :param vel: начальная скорость - итерируемый из 2 элементов, который превращается в Vector2
+        :param angle: угол под которым запускается снаряд
         """
 
-        return ObjectInfo(pos, self.groups, self.image, vel, self.layer_change, self.damage)
+        image = pygame.transform.rotate(self.image, math.degrees(angle))
+
+        return ObjectInfo(pos, self.groups, image, vel, self.layer_change, self.damage)
 
 
 class ShipInfo(ObjectInfo):
     """ Информация об объекте ShipLike"""
     def __init__(self, pos, groups, image=pygame.Surface((50, 50)), vel=(0, 0), layer_change=useless,
                  attack_cooldown=PLAYER_COOLDOWN, max_speed=PLAYER_MAX_SPEED, acceleration=PLAYER_ACCELERATION, hp=100,
-                 damage=5):
+                 damage=5, hit_sound=None, shot_sound=None):
         """
         :param pos: Позиция объекта - итерируемый со значениями для x и y
         :param groups: группы, в которые нужно включить спрайт
@@ -72,6 +75,8 @@ class ShipInfo(ObjectInfo):
         :param acceleration: насколько меняется скорость, когда корабль пытается ее изменить
         :param hp: количество здоровья
         :param damage: урон, наносимый при столкновении
+        :param hit_sound: звук, играемый при получении урона
+        :param shot_sound: звук, играемый при выстреле
         """
         super().__init__(pos, groups, image, vel, layer_change, damage)
 
@@ -79,6 +84,15 @@ class ShipInfo(ObjectInfo):
         self.max_speed = max_speed
         self.acceleration = acceleration
         self.hp = hp
+
+        if hit_sound is None:
+            hit_sound = pygame.mixer.Sound('../sound/hit.mp3')
+
+        if shot_sound is None:
+            shot_sound = pygame.mixer.Sound('../sound/shot.mp3')
+
+        self.hit_sound = hit_sound
+        self.shot_sound = shot_sound
 
 
 class PlayerInfo(ShipInfo):
@@ -94,14 +108,19 @@ class PlayerInfo(ShipInfo):
         loaded_image = pygame.image.load(PLAYER_IMAGE).convert_alpha()
         image = pygame.transform.rotate(loaded_image, -90)
 
-        super(PlayerInfo, self).__init__(pos, groups, image, vel, layer_change)
+        hit_sound = pygame.mixer.Sound('../sound/hit.mp3')
+
+        shot_sound = pygame.mixer.Sound('../sound/shot.mp3')
+
+        super(PlayerInfo, self).__init__(pos, groups, image, vel, layer_change,
+                                         hit_sound=hit_sound, shot_sound=shot_sound)
 
 
 class EnemyInfo(ShipInfo):
     """ Информация о вражеском корабле"""
     def __init__(self, pos, groups, image=pygame.Surface((50, 50)), vel=(0, 0), layer_change=useless,
                  attack_cooldown=PLAYER_COOLDOWN, max_speed=PLAYER_MAX_SPEED, acceleration=PLAYER_ACCELERATION, hp=100,
-                 attack_radius=400, detection_radius=1000, stop_radius=200, damage=5):
+                 attack_radius=400, detection_radius=1000, stop_radius=200, damage=5, hit_sound=None, shot_sound=None):
         """
         :param pos: Позиция объекта - итерируемый со значениями для x и y
         :param groups: группы, в которые нужно включить спрайт
@@ -116,8 +135,11 @@ class EnemyInfo(ShipInfo):
         :param detection_radius: расстояние начиная с которого противник начинает приближаться к игроку
         :param stop_radius: расстояние, на котором противник останавливается
         :param damage: урон, наносимый при столкновении
+        :param hit_sound: звук, играемый при получении урона
+        :param shot_sound: звук, играемый при выстреле
         """
-        super().__init__(pos, groups, image, vel, layer_change, attack_cooldown, max_speed, acceleration, hp, damage)
+        super().__init__(pos, groups, image, vel, layer_change, attack_cooldown, max_speed, acceleration, hp, damage,
+                         hit_sound, shot_sound)
 
         self.attack_radius = attack_radius
         self.detection_radius = detection_radius

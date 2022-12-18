@@ -2,6 +2,8 @@ import pygame
 from button import Button
 from settings import *
 from scene import Scene
+from pygame import mixer
+from support import *
 
 
 class MainMenu(Scene):
@@ -14,6 +16,9 @@ class MainMenu(Scene):
         self.loc_data = game.loc_values['main_menu']
 
         self.buttons = []
+
+        self.button_sound = mixer.Sound('../sound/buttonclick.mp3')
+        self.button_image = load_image('../graphics/menu/buttonBlue.png')
 
     def run(self, dt, mouse_click):
         super(MainMenu, self).run(dt, mouse_click)
@@ -41,21 +46,26 @@ class MainMenu(Scene):
 
         self.buttons.append(
             Button((WIDTH*0.5, first_h), size=button_size,
-                   text=self.loc_data['play'], text_color=WHITE, font=button_font,
-                   on_click=lambda: self.change_game_state('play')))
+                   text=self.loc_data['play'], text_color=BLUE, font=button_font,
+                   on_click=lambda: self.change_game_state('play'), sound=self.button_sound, image=self.button_image,
+                   hover_image=self.button_image))
         self.buttons.append(
             Button((WIDTH*0.5, first_h + button_space), size=button_size,
-                   text=self.loc_data['about'], text_color=WHITE, font=button_font,
-                   on_click=lambda: self.change_game_state('about')))
+                   text=self.loc_data['about'], text_color=BLUE, font=button_font,
+                   on_click=lambda: self.change_game_state('about'), sound=self.button_sound, image=self.button_image,
+                   hover_image=self.button_image))
         self.buttons.append(
             Button((WIDTH*0.5, first_h + 2*button_space), size=button_size,
-                   text=self.loc_data['how_to_play'], text_color=WHITE, font=button_font,
-                   on_click=lambda: self.change_game_state('how_to_play')))
+                   text=self.loc_data['how_to_play'], text_color=BLUE, font=button_font,
+                   on_click=lambda: self.change_game_state('how_to_play'), sound=self.button_sound,
+                   image=self.button_image, hover_image=self.button_image))
         self.buttons.append(
             Button((WIDTH * 0.5, first_h + 3*button_space), size=button_size,
-                   text=self.loc_data['settings'], text_color=WHITE, font=button_font,
-                   on_click=lambda: self.change_game_state('settings')))
+                   text=self.loc_data['settings'], text_color=BLUE, font=button_font,
+                   on_click=lambda: self.change_game_state('settings'), sound=self.button_sound,
+                   image=self.button_image, hover_image=self.button_image))
         self.buttons.append(
             Button((WIDTH * 0.5, first_h + 4*button_space), size=button_size,
-                   text=self.loc_data['exit'], text_color=WHITE, font=button_font,
-                   on_click=lambda: self.change_game_state('exit')))
+                   text=self.loc_data['exit'], text_color=BLUE, font=button_font,
+                   on_click=lambda: self.change_game_state('exit'), sound=self.button_sound,
+                   image=self.button_image, hover_image=self.button_image))

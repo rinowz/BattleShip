@@ -3,8 +3,9 @@ from settings import *
 
 
 class Button:
+    """ Кнопка - вещь меняющаяся при наведении мыши и вызывающая событие при нажатии"""
     def __init__(self, pos, image=None, hover_image=None, size=None, text='', font=None,
-                 text_color=BLACK, text_hover_color=BLACK, on_click=lambda: 1+1, pos_center=True):
+                 text_color=BLACK, text_hover_color=BLACK, on_click=lambda: 1+1, pos_center=True, sound=None):
         """
         :param pos: Позиция кнопки
         :param image: Sufrace изображения кнопки
@@ -16,6 +17,7 @@ class Button:
         :param text_hover_color: цвет текста при наведении курсором на кнопку
         :param on_click: функция, вызываемая при нажатии на кнопку
         :param pos_center: определяет присваивается ли позиция центру кнопки или левому верхнему углу
+        :param sound: звук при нажатии
         """
 
         # дефолтные значения
@@ -52,6 +54,7 @@ class Button:
         self.hover = False
 
         self.on_click = on_click
+        self.sound = sound
 
     def update(self, mouse_click):
         self.set_hover()
@@ -64,9 +67,12 @@ class Button:
             self.display_surface.blit(self.text_surf, self.text_rect)
 
         if mouse_click and self.hover:
+            if self.sound:
+                self.sound.play()
             self.on_click()
 
     def set_hover(self):
+        """ Устанавливает значение hover в зависимости от положения мыши"""
         self.hover = False
         mouse_pos = pygame.mouse.get_pos()
         if self.rect.collidepoint(mouse_pos[0], mouse_pos[1]):

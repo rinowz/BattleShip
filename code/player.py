@@ -5,6 +5,7 @@ from ship_like import ShipLike
 from settings import *
 from support import *
 from exploding_object import ExplodingObject
+from player_projectile import PlayerProjectile
 
 
 class Player(ShipLike):
@@ -19,6 +20,9 @@ class Player(ShipLike):
         :param nuclear_rocket_info: информация о ядерной бомбе
         """
         super(Player, self).__init__(player_info, projectile_info)
+
+        self.nuclear_shot = False
+        self.nuclear_sound = mixer.Sound('../sound/flight.mp3')
 
         # изначальное изображение положением вправо
         self.angle = 0
@@ -76,9 +80,40 @@ class Player(ShipLike):
 
         return False
 
+    def shoot(self, info=None):
+        """ Стреляет объектом типа PlayerProjectile"""
+
+        if self.nuclear_shot:
+            self.nuclear_sound.play()
+        else:
+            self.shot_sound.play()
+
+        if info is None:
+            info = self.projectile_info
+
+        projectile_vel = info.speed * pygame.math.Vector2(math.cos(self.angle), -math.sin(self.angle))
+
+        projectile = PlayerProjectile(info.get_object_info(self.pos, projectile_vel, angle=self.angle),
+                                     info.collision_group)
+        projectile.exclude_collision_list(self.no_hit_objects)
+
     def nuclear_launch(self):
         """ Проверяет и производит запуск ядерной бомбы"""
         keys = pygame.key.get_pressed()
         if keys[CONTROLS['nuclear_launch']] and self.nuclear_count > 0:
+            self.nuclear_shot = True
             if self.shooting(self.nuclear_info, True):
                 self.nuclear_count -= 1
+            self.nuclear_shot = False
+
+    def hit(self, hitter):
+        """
+        Нанесение урона игроку
+        :param hitter: объект, вызвавший повреждение
+        """
+        self.hp -= hitter.damage
+
+        if self.hp <= 0:
+            self.destroy()
+        else:
+            self.hit_sound.play()
