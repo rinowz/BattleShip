@@ -1,0 +1,61 @@
+import pygame
+from button import Button
+from settings import *
+from scene import Scene
+
+
+class MainMenu(Scene):
+    def __init__(self, game):
+        """
+        :param game: Объект игры, из которого достаются необходимые переменные
+        """
+        super().__init__(game)
+
+        self.loc_data = game.loc_values['main_menu']
+
+        self.buttons = []
+
+    def run(self, dt, mouse_click):
+        super(MainMenu, self).run(dt, mouse_click)
+
+        for button in self.buttons:
+            button.update(mouse_click)
+
+    def toggle_pause(self):
+        self.change_game_state('exit')
+
+    def finish_initialization(self):
+        """ Создает все элементы экрана"""
+        self.display_surface.fill(BLUE)
+
+        game_name_font = pygame.font.SysFont('Times New Roman', 100)
+        game_name_text = game_name_font.render(self.loc_data['game_name'], True, WHITE)
+        game_name_rect = game_name_text.get_rect(center=(WIDTH * 0.5, HEIGHT * 0.15))
+        self.display_surface.blit(game_name_text, game_name_rect)
+
+        button_size = (WIDTH*0.3, HEIGHT*0.1)
+        button_font = pygame.font.SysFont('Times New Roman', 50)
+
+        first_h = HEIGHT*0.5 - 1.2*button_size[1]
+        button_space = 1.2*button_size[1]
+
+        self.buttons.append(
+            Button((WIDTH*0.5, first_h), size=button_size,
+                   text=self.loc_data['play'], text_color=WHITE, font=button_font,
+                   on_click=lambda: self.change_game_state('play')))
+        self.buttons.append(
+            Button((WIDTH*0.5, first_h + button_space), size=button_size,
+                   text=self.loc_data['about'], text_color=WHITE, font=button_font,
+                   on_click=lambda: self.change_game_state('about')))
+        self.buttons.append(
+            Button((WIDTH*0.5, first_h + 2*button_space), size=button_size,
+                   text=self.loc_data['how_to_play'], text_color=WHITE, font=button_font,
+                   on_click=lambda: self.change_game_state('how_to_play')))
+        self.buttons.append(
+            Button((WIDTH * 0.5, first_h + 3*button_space), size=button_size,
+                   text=self.loc_data['settings'], text_color=WHITE, font=button_font,
+                   on_click=lambda: self.change_game_state('settings')))
+        self.buttons.append(
+            Button((WIDTH * 0.5, first_h + 4*button_space), size=button_size,
+                   text=self.loc_data['exit'], text_color=WHITE, font=button_font,
+                   on_click=lambda: self.change_game_state('exit')))

@@ -10,14 +10,17 @@ from enemy_ship import EnemyShip
 from ui import UI
 from turret import Turret
 from target import Target
+from scene import Scene
 
 
-class Level:
+class Level(Scene):
     """ Уровень - происходит процесс "игры" игры"""
 
-    def __init__(self, change_game_state):
-        # Функция смены сцены в игре
-        self.change_game_state = change_game_state
+    def __init__(self, game):
+        """
+        :param game: Объект игры, из которого достаются необходимые переменные
+        """
+        super().__init__(game)
 
         # начальные присваивания
         self.initialization_start()
@@ -25,17 +28,26 @@ class Level:
         # создаем игрока
         self.player_setup()
 
+        # создание цели
+        self.target_setup()
+
         # генерируем карту
         generator = self.MapGenerator(self.visible_sprites, BORDERS, self.images, self.layer_change, self.player)
         object_list = generator.generate(10, 10, 10)
 
-        # создание цели
-        self.target_setup()
-
         # UI
         self.ui = UI(self.player)
 
-    def run(self, dt):
+        # находится ли игра на паузе
+        self.paused = False
+
+    def run(self, dt, mouse_click):
+        super(Level, self).run(dt, mouse_click)
+
+        if self.paused:
+            self.ui.display()
+            return
+
         if not self.player.alive():
             self.game_result = 'loss'
             self.change_game_state('game_over')
@@ -56,6 +68,10 @@ class Level:
 
         self.ui.display()
 
+    def toggle_pause(self):
+        self.paused = not self.paused
+        self.ui.paused = self.paused
+
     def load_images(self):
         self.images['enemy'] = load_image("ships/ship2.0.png", -90)
         self.images['meteors'] = open_image_folder("../graphics/meteors")
@@ -68,7 +84,6 @@ class Level:
         self.images = {}
         self.load_images()
 
-        self.display_surface = pygame.display.get_surface()
         self.background_surf = pygame.image.load("../graphics/background.jpg")
         self.background_rect = self.background_surf.get_rect(center=BACKGROUND_POSITION)
 
@@ -117,6 +132,9 @@ class Level:
     def end_level(self, game_result):
         self.game_result = game_result
         self.change_game_state('game_over')
+
+    def __del__(self):
+        pass
 
     class CameraGroup(pygame.sprite.LayeredUpdates):
         """ Отражает существование камеры. Такая же фигня, как и pygame.sprite.LayeredUpdates,
@@ -316,6 +334,9 @@ class Level:
 
                 pos = (x_pos, y_pos)
                 rect.center = pos
+
+                if pygame.math.Vector2(add_lists(pos, minus(self.player.pos))).magnitude() < 1000:
+                    continue
 
                 if self.check_collision(rect):
                     return pos

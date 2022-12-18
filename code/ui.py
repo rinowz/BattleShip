@@ -10,7 +10,16 @@ class UI:
         self.player = player
         self.health_bar_rect = pygame.Rect(HEALTH_BAR_POS[0], HEALTH_BAR_POS[1], HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT)
 
+        self.pause_surf = pygame.Surface((WIDTH, HEIGHT))
+        self.pause_surf.fill(ALMOST_WHITE)
+        self.pause_surf.set_colorkey(ALMOST_WHITE)
+        self.paused = False
+
     def display(self):
+        if self.paused:
+            self.display_surface.blit(self.pause_surf, (0, 0))
+            return
+
         width = HEALTH_BAR_WIDTH * self.player.hp / self.player.max_hp
         health_bar = self.health_bar_rect.copy()
         health_bar.width = width

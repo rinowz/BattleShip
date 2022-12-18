@@ -4,9 +4,9 @@ from settings import *
 
 class Button:
     def __init__(self, pos, image=None, hover_image=None, size=None, text='', font=None,
-                 text_color=BLACK, text_hover_color=BLACK, on_click=lambda: 1+1):
+                 text_color=BLACK, text_hover_color=BLACK, on_click=lambda: 1+1, pos_center=True):
         """
-        :param pos: Позиция центра кнопки
+        :param pos: Позиция кнопки
         :param image: Sufrace изображения кнопки
         :param hover_image: изображение при наведение курсора
         :param size: Размер кнопки
@@ -15,6 +15,7 @@ class Button:
         :param text_color: цвет текста
         :param text_hover_color: цвет текста при наведении курсором на кнопку
         :param on_click: функция, вызываемая при нажатии на кнопку
+        :param pos_center: определяет присваивается ли позиция центру кнопки или левому верхнему углу
         """
 
         # дефолтные значения
@@ -33,7 +34,10 @@ class Button:
         # кнопка
         self.image = image
         self.hover_image = hover_image
-        self.rect = self.image.get_rect(center=pos)
+        if pos_center:
+            self.rect = self.image.get_rect(center=pos)
+        else:
+            self.rect = self.image.get_rect(topleft=pos)
         self.hover_rect = self.hover_image.get_rect(center=self.rect.center)
 
         # текст

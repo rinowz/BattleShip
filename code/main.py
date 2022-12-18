@@ -1,13 +1,14 @@
-"""
-Главный файл, который нужно запускать, чтобы запустить игру.
-
-"""
+""" Главный файл, который нужно запускать, чтобы запустить игру."""
 import pygame
 from settings import *
 from support import *
 from level import Level
 import time
 from game_over import GameOver
+from main_menu import MainMenu
+from menu_about import About
+from menu_how_to_play import HowToPlay
+from menu_settings import Settings
 
 
 class Game:
@@ -25,8 +26,8 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         # состояние игры - сцена, которая должна отображаться
-        self.state = DEFAULT_STATE
-        self.level = Level(self.change_game_state)
+        self.change_game_state(DEFAULT_STATE)
+
         self.prev_time = time.time()
         # self.game_over = GameOver('victory', self.change_game_state, self.loc_values)
 
@@ -42,15 +43,16 @@ class Game:
                     self.running = False
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        self.running = False
+                        self.scene.toggle_pause()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     mouse_click = True
 
-            # меняем игру и рисуем что нужно
+            # задаем время между кадрами
             dt = time.time() - self.prev_time
             self.prev_time = time.time()
 
-            self.update(dt, mouse_click)
+            # меняем игру и рисуем что нужно
+            self.scene.run(dt, mouse_click)
 
             # обновление
             pygame.display.flip()
@@ -58,26 +60,25 @@ class Game:
 
         pygame.quit()
 
-    def update(self, dt, mouse_click):
-        """ Внести изменения в игру в зависимости от сцены
-        :param dt: время между кадрами,
-        которое используется, чтобы установить с какой скоростью должны двигаться спрайты.
-        """
-
-        if self.state == "play":
-            self.level.run(dt)
-        elif self.state == "game_over":
-            self.game_over.run(mouse_click)
-
     def change_game_state(self, state):
         """ Меняет состояние игры"""
         self.state = state
 
-        if self.state == 'play':
-            self.level = Level(self.change_game_state)
+        if self.state == 'exit':
+            self.running = False
+        elif self.state == 'play':
+            self.scene = Level(self)
         elif self.state == 'game_over':
-            self.game_result = self.level.game_result
-            self.game_over = GameOver(self.game_result, self.change_game_state, self.loc_values)
+            self.game_result = self.scene.game_result
+            self.scene = GameOver(self)
+        elif self.state == 'main_menu':
+            self.scene = MainMenu(self)
+        elif self.state == 'about':
+            self.scene = About(self)
+        elif self.state == 'how_to_play':
+            self.scene = HowToPlay(self)
+        elif self.state == 'settings':
+            self.scene = Settings(self)
 
 
 game = Game()
