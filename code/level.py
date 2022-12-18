@@ -34,7 +34,7 @@ class Level(Scene):
         # генерируем карту
         generator = self.MapGenerator(self.visible_sprites, BORDERS, self.images, self.sound,
                                       self.layer_change, self.player)
-        object_list = generator.generate(10, 10, 10)
+        object_list = generator.generate(10, 15, 15)
 
         # UI
         self.ui = UI(self.player)
