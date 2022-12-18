@@ -57,3 +57,9 @@ TURRET_SIZE = 90
 TURRET_OFFSET = (-18, 0)
 
 TARGET_POS = (2500, 2500)
+
+GRAY_CURSOR_SURF = pygame.image.load('../graphics/menu/cursor2.png')
+GRAY_CURSOR = pygame.cursors.Cursor((0, 0), GRAY_CURSOR_SURF)
+
+COLORED_CURSOR_SURF = pygame.image.load('../graphics/menu/cursor4.png')
+COLORED_CURSOR = pygame.cursors.Cursor((0, 0), COLORED_CURSOR_SURF)

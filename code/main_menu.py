@@ -20,6 +20,8 @@ class MainMenu(Scene):
         self.button_sound = mixer.Sound('../sound/buttonclick.mp3')
         self.button_image = load_image('../graphics/menu/buttonBlue.png')
 
+        self.background_surf = load_image('backgrounds/background_menu.png')
+
     def run(self, dt, mouse_click):
         super(MainMenu, self).run(dt, mouse_click)
 
@@ -32,6 +34,7 @@ class MainMenu(Scene):
     def finish_initialization(self):
         """ Создает все элементы экрана"""
         self.display_surface.fill(BLUE)
+        self.background_setup()
 
         game_name_font = pygame.font.SysFont('Times New Roman', 100)
         game_name_text = game_name_font.render(self.loc_data['game_name'], True, WHITE)
@@ -69,3 +72,19 @@ class MainMenu(Scene):
                    text=self.loc_data['exit'], text_color=BLUE, font=button_font,
                    on_click=lambda: self.change_game_state('exit'), sound=self.button_sound,
                    image=self.button_image, hover_image=self.button_image))
+
+    def background_setup(self):
+        first_pos = (0, 0)
+
+        step_x = 256
+        step_y = 256
+
+        self.background_rects = []
+        for x_index in range(0, 2+WIDTH//step_x):
+            for y_index in range(0, 2+WIDTH//step_y):
+                self.background_rects.append(
+                    self.background_surf.get_rect(topleft=add_lists(first_pos, (step_x*x_index, step_y*y_index))))
+        change_cursor(True)
+
+        for rect in self.background_rects:
+            self.display_surface.blit(self.background_surf, rect)

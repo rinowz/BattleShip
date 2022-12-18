@@ -128,12 +128,9 @@ class Level(Scene):
 
     def target_setup(self):
         """ Проводит создание цели, которую нужно уничтожить игроку"""
-        radius = 100
-        image = pygame.Surface((2 * radius, 2 * radius))
-        image.set_colorkey(BLACK)
-        pygame.draw.circle(image, BLUE, (radius, radius), radius)
+        target_surf = load_image('earth.png')
 
-        target_info = ObjectInfo((0, 0), [self.visible_sprites], image, layer_change=self.layer_change)
+        target_info = ObjectInfo((0, 0), [self.visible_sprites], target_surf, layer_change=self.layer_change)
 
         self.target = Target(target_info, self.end_level)
 

@@ -191,3 +191,9 @@ def generate_multiple(number, generating_function):
 
     return generated_objects
 
+
+def change_cursor(colored=False):
+    if colored:
+        pygame.mouse.set_cursor(COLORED_CURSOR)
+    elif not colored:
+        pygame.mouse.set_cursor(GRAY_CURSOR)
