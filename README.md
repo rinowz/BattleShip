@@ -73,4 +73,5 @@
 * Звуки: https://zvukipro.com/music/
 * Видео взрыва: https://www.youtube.com/watch?v=FQSXOlkvWvY
 * Арты: https://opengameart.org/content/space-shooter-redux
+* Фон игры: https://catherineasquithgallery.com/
 * pyvidplayer - запуск видео на pygame: https://github.com/ree1261/pyvidplayer
