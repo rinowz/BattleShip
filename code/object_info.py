@@ -86,10 +86,10 @@ class ShipInfo(ObjectInfo):
         self.hp = hp
 
         if hit_sound is None:
-            hit_sound = pygame.mixer.Sound('../sound/hit.mp3')
+            hit_sound = pygame.mixer.Sound(os.path.join(os.getcwd(), '..', 'sound', 'hit.mp3'))
 
         if shot_sound is None:
-            shot_sound = pygame.mixer.Sound('../sound/shot.mp3')
+            shot_sound = pygame.mixer.Sound(os.path.join(os.getcwd(), '..', 'sound', 'shot.mp3'))
 
         self.hit_sound = hit_sound
         self.shot_sound = shot_sound
@@ -108,9 +108,9 @@ class PlayerInfo(ShipInfo):
         loaded_image = pygame.image.load(PLAYER_IMAGE).convert_alpha()
         image = pygame.transform.rotate(loaded_image, -90)
 
-        hit_sound = pygame.mixer.Sound('../sound/hit.mp3')
+        hit_sound = pygame.mixer.Sound(os.path.join(os.getcwd(), '..', 'sound/hit.mp3'))
 
-        shot_sound = pygame.mixer.Sound('../sound/shot.mp3')
+        shot_sound = pygame.mixer.Sound(os.path.join(os.getcwd(), '..', 'sound', 'shot.mp3'))
 
         super(PlayerInfo, self).__init__(pos, groups, image, vel, layer_change,
                                          hit_sound=hit_sound, shot_sound=shot_sound)

@@ -12,7 +12,7 @@ def get_loc_values():
     :return: словарь на языке, который установлен в данный момент
     """
 
-    with open("../localization/" + LANGUAGE + ".json", "r") as loc_file:
+    with open(os.path.join(os.getcwd(), '..', 'localization', LANGUAGE + '.json'), "r") as loc_file:
         values = json.load(loc_file)
 
     return values
@@ -175,7 +175,7 @@ def load_image(path, angle=0):
     :return: surface изображения
     """
 
-    image_surf = pygame.image.load("../graphics/"+path)
+    image_surf = pygame.image.load(os.path.join(os.getcwd(), '..', 'graphics', path))
     if ".png" in path:
         image_surf = image_surf.convert_alpha()
 

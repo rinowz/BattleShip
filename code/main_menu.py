@@ -17,8 +17,8 @@ class MainMenu(Scene):
 
         self.buttons = []
 
-        self.button_sound = mixer.Sound('../sound/buttonclick.mp3')
-        self.button_image = load_image('../graphics/menu/buttonBlue.png')
+        self.button_sound = mixer.Sound(os.path.join(os.getcwd(), '..', 'sound', 'buttonclick.mp3'))
+        self.button_image = load_image(os.path.join('menu', 'buttonBlue.png'))
 
         self.background_surf = load_image('backgrounds/background_menu.png')
 

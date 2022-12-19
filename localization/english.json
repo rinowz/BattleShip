@@ -15,5 +15,12 @@
     "settings": "Settings",
     "exit": "Exit",
     "back": "Back"
+  },
+  "pause_menu": {
+    "paused": "paused",
+    "exit": "Exit game",
+    "restart": "Restart",
+    "main_menu": "Main menu",
+    "resume": "Resume"
   }
 }

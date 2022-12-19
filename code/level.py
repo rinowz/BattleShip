@@ -40,7 +40,7 @@ class Level(Scene):
         object_list = generator.generate(50, 50, 50)
 
         # UI
-        self.ui = UI(self.player)
+        self.ui = UI(self.player, game.loc_values, self.change_game_state, self.toggle_pause)
 
         # находится ли игра на паузе
         self.paused = False
@@ -49,7 +49,7 @@ class Level(Scene):
         super(Level, self).run(dt, mouse_click)
         # обработка паузы игры
         if self.paused:
-            self.ui.display()
+            self.ui.display(mouse_click)
             return
 
         # конец игры
@@ -68,7 +68,7 @@ class Level(Scene):
         self.visible_sprites.update(dt)
         self.visible_sprites.offset_draw(dt)
 
-        self.ui.display()
+        self.ui.display(mouse_click)
 
     def toggle_pause(self):
         self.paused = not self.paused
@@ -77,19 +77,21 @@ class Level(Scene):
 
     def load_images(self):
         """ Загружает используемые изображения"""
-        self.images['meteors'] = open_image_folder("../graphics/meteors")
+        self.images['meteors'] = open_image_folder(os.path.join(os.getcwd(), '..', 'graphics', 'meteors'))
         self.images['turret'] = {
-            'platform': pygame.transform.scale(load_image("turret/gun_platform.png"), (TURRET_SIZE, TURRET_SIZE)),
-            "gun": pygame.transform.scale(load_image("turret/gun.png", -90), (TURRET_SIZE, TURRET_SIZE))}
-        self.images['enemy_projectile'] = load_image("projectiles/laserBlue.png", -90)
-        self.images['nuclear_bomb'] = load_image('projectiles/bomb.png', -90)
-        self.images['player_projectile'] = pygame.transform.scale(load_image('projectiles/laserRed.png', -90), (82, 20))
-        self.images['enemy_ship'] = load_image('ships/enemy_ship.png', -90)
+            'platform': pygame.transform.scale(load_image(os.path.join('turret', 'gun_platform.png')),
+                                               (TURRET_SIZE, TURRET_SIZE)),
+            "gun": pygame.transform.scale(load_image(os.path.join('turret', 'gun.png'), -90), (TURRET_SIZE, TURRET_SIZE))}
+        self.images['enemy_projectile'] = load_image(os.path.join('projectiles', 'laserBlue.png'), -90)
+        self.images['nuclear_bomb'] = load_image(os.path.join('projectiles', 'bomb.png'), -90)
+        self.images['player_projectile'] = pygame.transform.scale(
+            load_image(os.path.join('projectiles', 'laserRed.png'), -90), (82, 20))
+        self.images['enemy_ship'] = load_image(os.path.join('ships', 'enemy_ship.png'), -90)
 
     def set_sound(self):
         """ Определяет используемый звук"""
-        self.sound['hit'] = pygame.mixer.Sound('../sound/hit.mp3')
-        self.sound['shot'] = pygame.mixer.Sound('../sound/shot.mp3')
+        self.sound['hit'] = pygame.mixer.Sound(os.path.join(os.getcwd(), '..', 'sound', 'hit.mp3'))
+        self.sound['shot'] = pygame.mixer.Sound(os.path.join(os.getcwd(), '..', 'sound', 'shot.mp3'))
 
     def initialization_start(self):
         """ Производит начальную установку уровня"""
@@ -100,7 +102,7 @@ class Level(Scene):
 
         # запускаем музыку
         mixer.music.fadeout(500)
-        mixer.music.load('../sound/fon.mp3')
+        mixer.music.load(os.path.join(os.getcwd(), '..', 'sound', 'fon.mp3'))
         mixer.music.play(-1, 0, 500)
 
         # группы
@@ -146,7 +148,7 @@ class Level(Scene):
     def background_setup(self):
         """ Создает изображение и прямоугольники для фона"""
 
-        self.background_surf = pygame.image.load("../graphics/backgrounds/background.jpg")
+        self.background_surf = load_image(os.path.join('backgrounds', 'background.jpg'))
 
         # достаем смещение камеры из объекта self.visible_sprites класса CameraGroup,
         # "камеру" котрой мы используем в уровне
@@ -163,7 +165,8 @@ class Level(Scene):
     def create_bomb_part_generator(self):
         """ Создает функцию, которая возвращает объекты в группе bomb_part_group"""
         def generate_bomb_part(pos):
-            image = pygame.transform.scale(random.choice(open_image_folder("../graphics/bomb_parts")), (20, 20))
+            image = pygame.transform.scale(random.choice(
+                open_image_folder(os.path.join(os.getcwd(), '..', 'graphics', 'bomb_parts'))), (20, 20))
             image.set_colorkey(ALMOST_WHITE)
             info = ObjectInfo(pos, [self.visible_sprites, self.bomb_part_group], image, layer_change=self.layer_change,
                               damage=0)

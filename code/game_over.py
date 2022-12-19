@@ -6,6 +6,7 @@ from button import Button
 from scene import Scene
 from pygame import mixer
 from support import *
+import os
 
 
 class GameOver(Scene):
@@ -30,7 +31,7 @@ class GameOver(Scene):
         self.game_over_rect = self.game_over_text.get_rect(center=(WIDTH * 0.5, HEIGHT * 0.2))
 
         if self.result == 'victory':
-            self.video = Video('../video/final.mp4')
+            self.video = Video(os.path.join(os.getcwd(), '..', 'video', 'final.mp4'))
             self.video.set_size((WIDTH, HEIGHT))
             self.playing_video = True
             self.finished_initialization = True
@@ -40,7 +41,9 @@ class GameOver(Scene):
         pygame.mouse.set_visible(False)
 
         # используемая музыка
-        self.music = {"victory": "../sound/endgame.mp3", "loss": "../sound/gameover.mp3"}
+        self.music = {
+            "victory": os.path.join(os.getcwd(), '..', 'sound', 'endgame.mp3'),
+            "loss": os.path.join(os.getcwd(), '..', 'sound', 'gameover.mp3')}
 
     def run(self, dt, mouse_click):
         super(GameOver, self).run(dt, mouse_click)
@@ -82,9 +85,9 @@ class GameOver(Scene):
         first_h = HEIGHT*0.5-0.25*button_size[1]
         button_space = 1.4*button_size[1]
 
-        sound = mixer.Sound('../sound/buttonclick.mp3')
+        sound = mixer.Sound(os.path.join(os.getcwd(), '..', 'sound', 'buttonclick.mp3'))
 
-        button_image = load_image('../graphics/menu/buttonBlue.png')
+        button_image = load_image(os.path.join('menu', 'ButtonBlue.png'))
 
         self.buttons.append(
             Button((WIDTH*0.5, first_h), size=button_size,

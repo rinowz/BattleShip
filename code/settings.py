@@ -1,4 +1,5 @@
 """ Настройки игры"""
+import os
 import pygame
 
 DEFAULT_STATE = "main_menu"
@@ -28,7 +29,7 @@ CONTROLS = {
     "nuclear_launch": pygame.K_b
 }
 
-PLAYER_IMAGE = "../graphics/ships/ship2.0.png"
+PLAYER_IMAGE = os.path.join(os.getcwd(), '..', 'graphics', 'ships', 'ship2.0.png')
 PLAYER_POSITION = [WIDTH//2, HEIGHT//2]
 BACKGROUND_POSITION = [-WIDTH//2, -HEIGHT//2]
 # Скорость снарядов, запускаемых игроком
@@ -59,9 +60,3 @@ TURRET_SIZE = 90
 TURRET_OFFSET = (-18, 0)
 
 TARGET_POS = (2500, 2500)
-
-GRAY_CURSOR_SURF = pygame.image.load('../graphics/menu/cursor2.png')
-GRAY_CURSOR = pygame.cursors.Cursor((0, 0), GRAY_CURSOR_SURF)
-
-COLORED_CURSOR_SURF = pygame.image.load('../graphics/menu/cursor4.png')
-COLORED_CURSOR = pygame.cursors.Cursor((0, 0), COLORED_CURSOR_SURF)

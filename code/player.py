@@ -23,7 +23,7 @@ class Player(ShipLike):
         super(Player, self).__init__(player_info, projectile_info)
 
         self.nuclear_shot = False
-        self.nuclear_sound = mixer.Sound('../sound/flight.mp3')
+        self.nuclear_sound = mixer.Sound(os.path.join(os.getcwd(), '..', 'sound', 'flight.mp3'))
 
         # изначальное изображение положением вправо
         self.angle = 0

@@ -38,7 +38,7 @@ class Game:
         self.prev_time = time.time()
 
         # меняем курсор
-        cursor_surf = pygame.image.load('../graphics/menu/cursor2.png')
+        cursor_surf = load_image(os.path.join('menu', 'cursor2.png'))
         game_cursor = pygame.cursors.Cursor((0, 0), cursor_surf)
         pygame.mouse.set_cursor(game_cursor)
 
@@ -77,7 +77,7 @@ class Game:
         # музыка появляется, если входить в меню
         menu_scenes = ("about", "how_to_play", "settings", "main_menu")
         if state in menu_scenes and self.state not in menu_scenes:
-            mixer.music.load('../sound/fonovai.mp3')
+            mixer.music.load(os.path.join(os.getcwd(), '..', 'sound', 'fonovai.mp3'))
             mixer.music.play(-1, 3.3, 500)
 
         self.state = state
