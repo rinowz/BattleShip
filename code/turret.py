@@ -6,19 +6,22 @@ from ship_like import ShipLike
 from player_shooting import PlayerShooting
 from object_info import ShipInfo
 from object import Object
+from object_info import ObjectInfo
 
 
 class Turret(Object):
     """ Турель - фигня стоящая на месте и стреляющая по игроку. Состоит из платформы, которая "является" этим объектом
     и создаваемого объекта движущейся стреляющей части"""
 
-    def __init__(self, turret_info, projectile_info, player):
+    def __init__(self, turret_info, projectile_info, player, generate_bomb_part):
         """
         :param turret_info: информация о создаваемой турели
         :param projectile_info: информация о выпускаемых снарядах
         """
 
         super().__init__(turret_info)
+
+        self.generate_bomb_part = generate_bomb_part
         self.gun = Gun(turret_info, projectile_info, player, self)
         self.hit_sound = self.gun.hit_sound
 
@@ -50,6 +53,7 @@ class Gun(PlayerShooting):
 
         self.platform = platform
         self.no_hit_objects = [self, self.platform]
+        self.generate_bomb_part = self.platform.generate_bomb_part
 
     def update(self, dt):
         super().update(dt, add_vel=False)
@@ -98,3 +102,5 @@ class Gun(PlayerShooting):
         """ Уничтожает себя вместе с платформой"""
         self.platform.kill()
         self.kill()
+
+        self.generate_bomb_part(self.pos)

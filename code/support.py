@@ -143,16 +143,26 @@ def get_direction(angle):
     return pygame.math.Vector2(math.cos(angle), -math.sin(angle))
 
 
-def open_image_folder(path):
+def open_image_folder(path, type='list'):
     """
     Загружает изображения из папки
     :param path:
-    :return: список из Surface изображений
+    :type: тип возвращаемого значения - list или dict
+    :return: массив из Surface изображений
     """
-    images = []
+    if type == 'list':
+        images = []
+    else:
+        images = {}
+
     for (dirpath, dirnames, filenames) in os.walk(path):
         for filename in filenames:
-            images.append(pygame.image.load(os.path.join(dirpath, filename)).convert_alpha())
+            image = pygame.image.load(os.path.join(dirpath, filename)).convert_alpha()
+
+            if type == 'list':
+                images.append(image)
+            else:
+                images[filename] = image
 
     return images
 

@@ -63,7 +63,6 @@ class Button:
         if self.hover:
             self.display_surface.blit(self.hover_image, self.hover_rect)
             self.display_surface.blit(self.text_hover_surf, self.text_rect)
-            change_cursor(True)
         else:
             self.display_surface.blit(self.image, self.rect)
             self.display_surface.blit(self.text_surf, self.text_rect)

@@ -84,7 +84,6 @@ class MainMenu(Scene):
             for y_index in range(0, 2+WIDTH//step_y):
                 self.background_rects.append(
                     self.background_surf.get_rect(topleft=add_lists(first_pos, (step_x*x_index, step_y*y_index))))
-        change_cursor(True)
 
         for rect in self.background_rects:
             self.display_surface.blit(self.background_surf, rect)

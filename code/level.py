@@ -11,6 +11,7 @@ from ui import UI
 from turret import Turret
 from target import Target
 from scene import Scene
+from object import Object
 
 
 class Level(Scene):
@@ -35,7 +36,7 @@ class Level(Scene):
 
         # генерируем карту
         generator = self.MapGenerator(self.visible_sprites, BORDERS, self.images, self.sound,
-                                      self.layer_change, self.player)
+                                      self.layer_change, self.player, self.create_bomb_part_generator)
         object_list = generator.generate(50, 50, 50)
 
         # UI
@@ -105,6 +106,7 @@ class Level(Scene):
         # группы
         self.visible_sprites = self.CameraGroup()
         self.collidable_sprites = pygame.sprite.Group()
+        self.bomb_part_group = pygame.sprite.Group()
 
         # функция изменения слоя
         self.layer_change = build_layer_change_function(self.visible_sprites)
@@ -122,9 +124,8 @@ class Level(Scene):
                                       self.layer_change, 1000, 1000)
 
         # создание игрока
-        self.player = Player(self.collidable_sprites, player_info, projectile_info, nuclear_info)
+        self.player = Player(self.collidable_sprites, player_info, projectile_info, nuclear_info, self.bomb_part_group)
         self.visible_sprites.player = self.player
-        self.player.nuclear_count = 10
 
     def target_setup(self):
         """ Проводит создание цели, которую нужно уничтожить игроку"""
@@ -158,6 +159,21 @@ class Level(Scene):
             for y_index in range(-3, 4):
                 self.background_rects.append(
                     self.background_surf.get_rect(center=add_lists(first_pos, (step_x*x_index, step_y*y_index))))
+
+    def create_bomb_part_generator(self):
+        """ Создает функцию, которая возвращает объекты в группе bomb_part_group"""
+        def generate_bomb_part(pos):
+            image = pygame.transform.scale(random.choice(open_image_folder("../graphics/bomb_parts")), (20, 20))
+            image.set_colorkey(ALMOST_WHITE)
+            info = ObjectInfo(pos, [self.visible_sprites, self.bomb_part_group], image, layer_change=self.layer_change,
+                              damage=0)
+
+            bomb = Object(info)
+            self.layer_change(bomb, -10)
+
+            return bomb
+
+        return generate_bomb_part
 
     class CameraGroup(pygame.sprite.LayeredUpdates):
         """ Отражает существование камеры. Такая же фигня, как и pygame.sprite.LayeredUpdates,
@@ -241,13 +257,14 @@ class Level(Scene):
     class MapGenerator:
         """ Генерирует объекты на карте"""
 
-        def __init__(self, visible_group, borders, images, sound, layer_change, player):
+        def __init__(self, visible_group, borders, images, sound, layer_change, player, create_bomb_part_generator):
             self.visible_group = visible_group
             self.borders = borders
             self.images = images
             self.sound = sound
             self.layer_change = layer_change
             self.player = player
+            self.create_bomb_part_generator = create_bomb_part_generator
 
             random.seed()
 
@@ -313,7 +330,7 @@ class Level(Scene):
             turret_info = TurretInfo(pos, groups, image, gun_image, gun_offset, gun_angle, layer_change,
                                      attack_cooldown, acceleration, hp, attack_radius)
 
-            return Turret(turret_info, self.generate_projectile(), self.player)
+            return Turret(turret_info, self.generate_projectile(), self.player, self.create_bomb_part_generator())
 
         def generate_projectile(self):
             """

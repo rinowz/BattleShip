@@ -42,10 +42,6 @@ class ExplodingObject(Object):
 
         objects = self.collision_group.sprites()
 
-        for object in objects:
-            if not object.rect:
-                print(object)
-
         # проверяем с чем может сталкиваться объект
         self.colliding_objects = pygame.sprite.spritecollide(self, self.collision_group, False)
 
@@ -65,12 +61,13 @@ class ExplodingObject(Object):
         """
         Убивает себя, перед этим нанося урон тому, чего касается
         """
-        colliding_objects = self.colliding_objects.copy()
-        for colliding_object in colliding_objects:
-            if self.mask.overlap(colliding_object.mask, get_mask_offset(self, colliding_object)):
-                colliding_object.hit(self)
+        if self.alive():
+            colliding_objects = self.colliding_objects.copy()
+            for colliding_object in colliding_objects:
+                if self.mask.overlap(colliding_object.mask, get_mask_offset(self, colliding_object)):
+                    colliding_object.hit(self)
 
-        self.kill()
+            self.kill()
 
     def exclude_collision(self, object):
         """ Не проверяет столкновение с данным объектом"""

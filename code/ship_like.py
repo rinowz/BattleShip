@@ -92,7 +92,7 @@ class ShipLike(Object):
         """
         self.hp -= hitter.damage
 
-        if self.hp <= 0:
+        if self.hp <= 0 and self.alive():
             self.destroy()
 
     def destroy(self):

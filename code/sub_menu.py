@@ -15,6 +15,7 @@ class SubMenu(MainMenu):
     def finish_initialization(self):
         """ Создает кнопку для возвращения в главное меню"""
         self.display_surface.fill(BLUE)
+        self.background_setup()
 
         button_font = pygame.font.SysFont('Times New Roman', 40)
         self.buttons.append(

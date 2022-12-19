@@ -1,5 +1,6 @@
 """ Класс PLayer"""
 import math
+import random
 import pygame.math
 from ship_like import ShipLike
 from settings import *
@@ -11,7 +12,7 @@ from player_projectile import PlayerProjectile
 class Player(ShipLike):
     """ Корабль, которым управляет игрок"""
 
-    def __init__(self, collidable_sprites, player_info, projectile_info, nuclear_rocket_info):
+    def __init__(self, collidable_sprites, player_info, projectile_info, nuclear_rocket_info, bomb_part_group):
         """
         :param collidable_sprites: группа содержащая спрайты,
         с которыми игрок будет "сталкиваться" - не проходить насквозь
@@ -32,12 +33,32 @@ class Player(ShipLike):
         self.nuclear_info = nuclear_rocket_info
         # Количество ядерных боеголовок
         self.nuclear_count = 0
+        self.max_nuclear_count = 5
+        # значение шкалы сбора ядерных боеголовок
+        self.nuclear_progress = 0
+        self.max_nuclear_bar = 15
+
+        self.bomb_part_group = bomb_part_group
 
     def update(self, dt):
         """
         :param dt: время между кадрами,
         которое используется, чтобы установить с какой скоростью должны двигаться спрайты."""
         super(Player, self).update(dt)
+
+        bomb_part_sprites = pygame.sprite.spritecollide(self, self.bomb_part_group, False).copy()
+
+        for sprite in bomb_part_sprites:
+            if self.nuclear_count < self.max_nuclear_count:
+                sprite.kill()
+                self.nuclear_progress += random.uniform(3, 5)
+
+                if self.nuclear_progress >= self.max_nuclear_bar:
+                    self.nuclear_count += int(self.nuclear_progress / self.max_nuclear_bar)
+                    self.nuclear_progress = self.nuclear_progress % self.max_nuclear_bar
+
+                print(self.nuclear_count)
+                print(self.nuclear_progress)
 
         # обработка запуска ядерной бомбы
         self.nuclear_launch()

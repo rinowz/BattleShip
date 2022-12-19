@@ -30,7 +30,7 @@ class GameOver(Scene):
         self.game_over_rect = self.game_over_text.get_rect(center=(WIDTH * 0.5, HEIGHT * 0.2))
 
         if self.result == 'victory':
-            self.video = Video('../video/finalvideo.mp4')
+            self.video = Video('../video/final.mp4')
             self.video.set_size((WIDTH, HEIGHT))
             self.playing_video = True
             self.finished_initialization = True
